@@ -1,26 +1,25 @@
 /* =========================================================
-   BLACKOUT — INVENTORY SYSTEM v2
-   Inventář + prohlížení předmětů + reset postupu
+   BLACKOUT — INVENTORY SYSTEM v3
 ========================================================= */
 
 
 /* =========================================================
-   DATA INVENTÁŘE
+   KONSTANTY
+========================================================= */
+
+const INVENTORY_STORAGE = "BLACKOUT_INVENTORY";
+const INVENTORY_FLAGS = "BLACKOUT_INV_FLAGS";
+
+
+/* =========================================================
+   INVENTÁŘ
 ========================================================= */
 
 let inventory = [];
 
 
 /* =========================================================
-   ÚLOŽIŠTĚ
-========================================================= */
-
-const INVENTORY_STORAGE =
-    "BLACKOUT_INVENTORY";
-
-
-/* =========================================================
-   NAČTENÍ INVENTÁŘE
+   NAČTENÍ
 ========================================================= */
 
 function loadInventory() {
@@ -53,16 +52,22 @@ function loadInventory() {
 
         }
 
-    } catch {
+    } catch (error) {
+
+        console.error(
+            "BLACKOUT inventory load error:",
+            error
+        );
 
         inventory = [];
 
     }
+
 }
 
 
 /* =========================================================
-   ULOŽENÍ INVENTÁŘE
+   ULOŽENÍ
 ========================================================= */
 
 function saveInventory() {
@@ -76,13 +81,25 @@ function saveInventory() {
 
 
 /* =========================================================
-   MÁ HRÁČ PŘEDMĚT?
+   POČET PŘEDMĚTŮ
+========================================================= */
+
+function inventoryCount() {
+
+    return inventory.length;
+
+}
+
+
+/* =========================================================
+   EXISTUJE PŘEDMĚT?
 ========================================================= */
 
 function hasItem(itemId) {
 
     return inventory.some(
-        item => item.id === itemId
+        item =>
+            item.id === itemId
     );
 
 }
@@ -90,6 +107,20 @@ function hasItem(itemId) {
 
 /* =========================================================
    ZÍSKÁNÍ PŘEDMĚTU
+========================================================= */
+
+function getItem(itemId) {
+
+    return inventory.find(
+        item =>
+            item.id === itemId
+    );
+
+}
+
+
+/* =========================================================
+   PŘIDÁNÍ PŘEDMĚTU
 ========================================================= */
 
 function addItem(
@@ -103,6 +134,10 @@ function addItem(
         return false;
     }
 
+
+    /*
+       Zabráníme duplicitám.
+    */
 
     if (hasItem(id)) {
 
@@ -121,18 +156,36 @@ function addItem(
 
         icon: icon,
 
-        examined: false,
-
-        state: {}
+        examined: false
 
     });
 
 
     saveInventory();
 
-    renderInventory();
+
+    if (
+        typeof renderInventory ===
+        "function"
+    ) {
+
+        renderInventory();
+
+    }
+
+
+    if (
+        typeof updateUI ===
+        "function"
+    ) {
+
+        updateUI();
+
+    }
+
 
     return true;
+
 }
 
 
@@ -142,24 +195,27 @@ function addItem(
 
 function removeItem(itemId) {
 
-    const oldLength =
+    const before =
         inventory.length;
 
 
     inventory =
         inventory.filter(
-            item => item.id !== itemId
+            item =>
+                item.id !== itemId
         );
 
 
     if (
         inventory.length !==
-        oldLength
+        before
     ) {
 
         saveInventory();
 
         renderInventory();
+
+        updateUI();
 
         return true;
 
@@ -167,470 +223,83 @@ function removeItem(itemId) {
 
 
     return false;
-}
-
-
-/* =========================================================
-   ZÍSKAT DATA PŘEDMĚTU
-========================================================= */
-
-function getItem(itemId) {
-
-    return inventory.find(
-        item => item.id === itemId
-    );
 
 }
 
 
 /* =========================================================
-   PROZKOUMÁNÍ PŘEDMĚTU
+   OTEVŘENÍ INVENTÁŘE
 ========================================================= */
 
-function examineItem(itemId) {
+function openInventory() {
 
-    const item =
-        getItem(itemId);
+    loadInventory();
+
+    renderInventory();
 
 
-    if (!item) {
-
-        showInventoryMessage(
-            "Tento předmět nemáš.",
-            "error"
+    const modal =
+        document.getElementById(
+            "inventoryModal"
         );
 
-        return;
 
-    }
-
-
-    item.examined = true;
-
-    saveInventory();
-
-
-    showItemDetail(itemId);
-
-}
-
-
-/* =========================================================
-   DETAIL PŘEDMĚTU
-========================================================= */
-
-function showItemDetail(itemId) {
-
-    const item =
-        getItem(itemId);
-
-
-    if (!item) {
+    if (!modal) {
         return;
     }
 
 
-    let detail = "";
+    modal.style.display =
+        "flex";
 
+    modal.classList.add(
+        "show"
+    );
 
-    switch (itemId) {
 
+    if (
+        typeof playSound ===
+        "function"
+    ) {
 
-        /* -------------------------------------------------
-           STARÝ PRŮKAZ
-        ------------------------------------------------- */
-
-        case "oldID":
-
-            detail = `
-
-                <div class="item-detail">
-
-                    <div class="item-big-icon">
-                        🪪
-                    </div>
-
-                    <div class="sector">
-                        PŘEDMĚT / PERSONÁL
-                    </div>
-
-                    <h2>
-                        STARÝ PRŮKAZ
-                    </h2>
-
-                    <p>
-                        Průkaz zaměstnance zařízení.
-                        Plast je poškrábaný a fotografie
-                        je téměř nečitelná.
-                    </p>
-
-                    <div class="clue-box">
-
-                        <strong>
-                            PŘEDNÍ STRANA
-                        </strong>
-
-                        <p>
-                            SECTOR 07
-                        </p>
-
-                        <p>
-                            EMPLOYEE ID:
-                            4729
-                        </p>
-
-                    </div>
-
-                    <button
-                        class="secondary-button"
-                        onclick="turnOldID()">
-
-                        🔄 OTOČIT PRŮKAZ
-
-                    </button>
-
-                    <div id="itemDetailMessage"></div>
-
-                </div>
-
-            `;
-
-            break;
-
-
-        /* -------------------------------------------------
-           POJISTKA
-        ------------------------------------------------- */
-
-        case "fuse":
-
-            detail = `
-
-                <div class="item-detail">
-
-                    <div class="item-big-icon">
-                        🔋
-                    </div>
-
-                    <div class="sector">
-                        TECHNICKÝ PŘEDMĚT
-                    </div>
-
-                    <h2>
-                        POJISTKA
-                    </h2>
-
-                    <p>
-                        Průmyslová pojistka.
-                        Ještě není úplně vypálená.
-                    </p>
-
-                    <div class="clue-box">
-
-                        Na kovové části je vyraženo:
-
-                        <strong>
-                            PWR-02
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            `;
-
-            break;
-
-
-        /* -------------------------------------------------
-           BEZPEČNOSTNÍ KARTA
-        ------------------------------------------------- */
-
-        case "securityCard":
-
-            detail = `
-
-                <div class="item-detail">
-
-                    <div class="item-big-icon">
-                        💳
-                    </div>
-
-                    <div class="sector">
-                        SECURITY
-                    </div>
-
-                    <h2>
-                        BEZPEČNOSTNÍ KARTA
-                    </h2>
-
-                    <p>
-                        Karta má stále funkční
-                        magnetický proužek.
-                    </p>
-
-                    <div class="clue-box">
-
-                        ACCESS LEVEL:
-                        <strong>
-                            03
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            `;
-
-            break;
-
-
-        /* -------------------------------------------------
-           AKTIVÁTOR
-        ------------------------------------------------- */
-
-        case "chemical":
-
-            detail = `
-
-                <div class="item-detail">
-
-                    <div class="item-big-icon">
-                        🧪
-                    </div>
-
-                    <div class="sector">
-                        LABORATORY
-                    </div>
-
-                    <h2>
-                        AKTIVÁTOR
-                    </h2>
-
-                    <p>
-                        Neznámá chemická látka.
-                    </p>
-
-                    <div class="clue-box">
-
-                        <strong>
-                            SUBJECT 07
-                        </strong>
-
-                        <br>
-
-                        HANDLE WITH CARE
-
-                    </div>
-
-                </div>
-
-            `;
-
-            break;
-
-
-        /* -------------------------------------------------
-           INCIDENT 07
-        ------------------------------------------------- */
-
-        case "incidentReport":
-
-            detail = `
-
-                <div class="item-detail">
-
-                    <div class="item-big-icon">
-                        📄
-                    </div>
-
-                    <div class="sector">
-                        CLASSIFIED
-                    </div>
-
-                    <h2>
-                        INCIDENT 07
-                    </h2>
-
-                    <p>
-                        Dokument popisuje událost,
-                        která byla oficiálně vymazána
-                        ze systému.
-                    </p>
-
-                    <div class="terminal-text">
-
-                        INCIDENT 07<br>
-                        STATUS: CLASSIFIED
-
-                    </div>
-
-                    <p class="important">
-                        „SUBJECT WAS NOT SUPPOSED
-                        TO SURVIVE.“
-                    </p>
-
-                </div>
-
-            `;
-
-            break;
-
-
-        /* -------------------------------------------------
-           PŘÍSTUPOVÝ TOKEN
-        ------------------------------------------------- */
-
-        case "accessToken":
-
-            detail = `
-
-                <div class="item-detail">
-
-                    <div class="item-big-icon">
-                        🔑
-                    </div>
-
-                    <div class="sector">
-                        ROOT ACCESS
-                    </div>
-
-                    <h2>
-                        PŘÍSTUPOVÝ TOKEN
-                    </h2>
-
-                    <p>
-                        Malé zařízení používané
-                        pracovníky s nejvyšším
-                        oprávněním.
-                    </p>
-
-                    <div class="clue-box">
-
-                        ACCESS:
-                        <strong>
-                            ROOT
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            `;
-
-            break;
-
-
-        /* -------------------------------------------------
-           DEFAULT
-        ------------------------------------------------- */
-
-        default:
-
-            detail = `
-
-                <div class="item-detail">
-
-                    <div class="item-big-icon">
-                        ${item.icon}
-                    </div>
-
-                    <h2>
-                        ${item.name}
-                    </h2>
-
-                    <p>
-                        ${item.description}
-                    </p>
-
-                </div>
-
-            `;
-
-            break;
+        playSound(
+            "click"
+        );
 
     }
 
-
-    openInventoryDetail(
-        detail
-    );
 }
 
 
 /* =========================================================
-   OTOČENÍ STARÉHO PRŮKAZU
+   ZAVŘENÍ INVENTÁŘE
 ========================================================= */
 
-function turnOldID() {
+function closeInventory() {
 
-    openInventoryDetail(`
-
-        <div class="item-detail">
-
-            <div class="item-big-icon">
-                🪪
-            </div>
-
-            <div class="sector">
-                STARÝ PRŮKAZ / ZADNÍ STRANA
-            </div>
-
-            <h2>
-                ZADNÍ STRANA
-            </h2>
-
-            <p>
-                Na zadní straně jsou staré
-                ručně psané poznámky.
-            </p>
-
-            <div class="clue-box">
-
-                <p>
-                    INCIDENT:
-                    <strong>07</strong>
-                </p>
-
-                <p>
-                    DATE:
-                    <strong>12 / 09</strong>
-                </p>
-
-                <p class="important">
-                    4729
-                </p>
-
-            </div>
-
-            <p>
-                Čtyři číslice jsou podtržené.
-                Stejné číslice jsi viděl
-                na terminálu.
-            </p>
-
-            <button
-                class="main-button"
-                onclick="closeInventoryDetail()">
-
-                ZPĚT DO INVENTÁŘE
-
-            </button>
-
-        </div>
-
-    `);
+    const modal =
+        document.getElementById(
+            "inventoryModal"
+        );
 
 
-    setInventoryFlag(
-        "oldID_rear_seen",
-        true
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.remove(
+        "show"
     );
+
+    modal.style.display =
+        "none";
+
 }
 
 
 /* =========================================================
-   INVENTÁŘ — VYKRESLENÍ
+   VYKRESLENÍ INVENTÁŘE
 ========================================================= */
 
 function renderInventory() {
@@ -646,7 +315,21 @@ function renderInventory() {
     }
 
 
-    if (inventory.length === 0) {
+    if (
+        !Array.isArray(
+            inventory
+        )
+    ) {
+
+        inventory = [];
+
+    }
+
+
+    if (
+        inventory.length ===
+        0
+    ) {
 
         container.innerHTML = `
 
@@ -687,9 +370,7 @@ function renderInventory() {
                 >
 
                     <div class="inventory-icon">
-
                         ${item.icon}
-
                     </div>
 
                     <div class="inventory-info">
@@ -701,8 +382,8 @@ function renderInventory() {
                         <small>
                             ${
                                 item.examined
-                                    ? "PROZKOUMÁNO"
-                                    : "NEPROZKOUMÁNO"
+                                ? "PROZKOUMÁNO"
+                                : "NEPROZKOUMÁNO"
                             }
                         </small>
 
@@ -714,10 +395,9 @@ function renderInventory() {
                             examineItem(
                                 '${item.id}'
                             )
-                        ">
-
+                        "
+                    >
                         🔎
-
                     </button>
 
                 </div>
@@ -728,66 +408,526 @@ function renderInventory() {
     );
 
 
-    container.innerHTML = html;
+    container.innerHTML =
+        html;
+
 }
 
 
 /* =========================================================
-   OTEVŘENÍ INVENTÁŘE
+   PROZKOUMÁNÍ
 ========================================================= */
 
-function openInventory() {
+function examineItem(itemId) {
 
-    loadInventory();
+    const item =
+        getItem(itemId);
 
-    renderInventory();
 
+    if (!item) {
 
-    const modal =
-        document.getElementById(
-            "inventoryModal"
+        showInventoryMessage(
+            "Tento předmět už v inventáři není.",
+            "error"
         );
 
+        return;
 
-    if (!modal) {
+    }
+
+
+    item.examined =
+        true;
+
+
+    saveInventory();
+
+
+    showItemDetail(
+        itemId
+    );
+
+}
+
+
+/* =========================================================
+   DETAIL PŘEDMĚTU
+========================================================= */
+
+function showItemDetail(itemId) {
+
+    const item =
+        getItem(itemId);
+
+
+    if (!item) {
         return;
     }
 
 
-    modal.style.display = "flex";
-
-    modal.classList.add("show");
-}
+    let html = "";
 
 
-/* =========================================================
-   ZAVŘENÍ INVENTÁŘE
-========================================================= */
-
-function closeInventory() {
-
-    const modal =
-        document.getElementById(
-            "inventoryModal"
-        );
+    switch (
+        itemId
+    ) {
 
 
-    if (!modal) {
-        return;
+        /* =================================================
+           STARÝ PRŮKAZ
+        ================================================= */
+
+        case "oldID":
+
+            html = `
+
+                <div class="item-detail">
+
+                    <div class="item-big-icon">
+                        🪪
+                    </div>
+
+                    <div class="sector">
+                        SECTOR 01 / PERSONNEL
+                    </div>
+
+                    <h2>
+                        STARÝ ZAMĚSTNANECKÝ PRŮKAZ
+                    </h2>
+
+                    <p>
+                        Plast je popraskaný.
+                        Fotografie je téměř
+                        úplně vybledlá.
+                    </p>
+
+                    <div class="clue-box">
+
+                        <strong>
+                            PŘEDNÍ STRANA
+                        </strong>
+
+                        <p>
+                            EMPLOYEE
+                            <br>
+                            ███████████
+                        </p>
+
+                        <p>
+                            DEPARTMENT
+                            <br>
+                            TECHNICAL
+                        </p>
+
+                        <p>
+                            VALID
+                            <br>
+                            2009
+                        </p>
+
+                        <p>
+                            EMPLOYEE ID
+                            <br>
+                            4█29
+                        </p>
+
+                    </div>
+
+                    <p class="hint">
+                        Jeden znak na průkazu
+                        je poškozený.
+                    </p>
+
+                    <button
+                        class="secondary-button"
+                        onclick="
+                            turnOldID()
+                        "
+                    >
+
+                        🔄 OTOČIT PRŮKAZ
+
+                    </button>
+
+                </div>
+
+            `;
+
+            break;
+
+
+        /* =================================================
+           POJISTKA
+        ================================================= */
+
+        case "fuse":
+
+            html = `
+
+                <div class="item-detail">
+
+                    <div class="item-big-icon">
+                        🔋
+                    </div>
+
+                    <div class="sector">
+                        TECHNICAL
+                    </div>
+
+                    <h2>
+                        PRŮMYSLOVÁ POJISTKA
+                    </h2>
+
+                    <p>
+                        Těžká keramická pojistka.
+                        Na kovové části je staré
+                        označení.
+                    </p>
+
+                    <div class="clue-box">
+
+                        PWR
+                        <strong>
+                            -02
+                        </strong>
+
+                    </div>
+
+                    <p class="hint">
+                        Mohla by patřit
+                        do některého rozvaděče.
+                    </p>
+
+                </div>
+
+            `;
+
+            break;
+
+
+        /* =================================================
+           BEZPEČNOSTNÍ KARTA
+        ================================================= */
+
+        case "securityCard":
+
+            html = `
+
+                <div class="item-detail">
+
+                    <div class="item-big-icon">
+                        💳
+                    </div>
+
+                    <div class="sector">
+                        SECURITY
+                    </div>
+
+                    <h2>
+                        BEZPEČNOSTNÍ KARTA
+                    </h2>
+
+                    <p>
+                        Karta zaměstnance
+                        bezpečnostního oddělení.
+                    </p>
+
+                    <div class="clue-box">
+
+                        ACCESS LEVEL
+                        <br>
+
+                        <strong>
+                            03
+                        </strong>
+
+                    </div>
+
+                    <p class="hint">
+                        Magnetický proužek
+                        nevypadá poškozeně.
+                    </p>
+
+                </div>
+
+            `;
+
+            break;
+
+
+        /* =================================================
+           AKTIVÁTOR
+        ================================================= */
+
+        case "chemical":
+
+            html = `
+
+                <div class="item-detail">
+
+                    <div class="item-big-icon">
+                        🧪
+                    </div>
+
+                    <div class="sector">
+                        LABORATORY
+                    </div>
+
+                    <h2>
+                        AKTIVÁTOR
+                    </h2>
+
+                    <p>
+                        Malá laboratorní lahvička.
+                        Kapalina uvnitř je čirá.
+                    </p>
+
+                    <div class="clue-box">
+
+                        LABEL:
+                        <strong>
+                            SUBJECT 07
+                        </strong>
+
+                        <br><br>
+
+                        HANDLE WITH CARE
+
+                    </div>
+
+                </div>
+
+            `;
+
+            break;
+
+
+        /* =================================================
+           INCIDENT 07
+        ================================================= */
+
+        case "incidentReport":
+
+            html = `
+
+                <div class="item-detail">
+
+                    <div class="item-big-icon">
+                        📄
+                    </div>
+
+                    <div class="sector">
+                        CLASSIFIED
+                    </div>
+
+                    <h2>
+                        INCIDENT 07
+                    </h2>
+
+                    <p>
+                        Dokument je starý,
+                        ale někdo ho otevřel
+                        krátce před tebou.
+                    </p>
+
+                    <div class="terminal-text">
+
+                        INCIDENT 07
+                        <br>
+                        DATE: 12 / 09
+                        <br>
+                        STATUS: CLASSIFIED
+
+                    </div>
+
+                    <p class="important">
+                        SUBJECT WAS NOT SUPPOSED
+                        TO SURVIVE.
+                    </p>
+
+                </div>
+
+            `;
+
+            break;
+
+
+        /* =================================================
+           PŘÍSTUPOVÝ TOKEN
+        ================================================= */
+
+        case "accessToken":
+
+            html = `
+
+                <div class="item-detail">
+
+                    <div class="item-big-icon">
+                        🔑
+                    </div>
+
+                    <div class="sector">
+                        CONTROL CENTER
+                    </div>
+
+                    <h2>
+                        PŘÍSTUPOVÝ TOKEN
+                    </h2>
+
+                    <p>
+                        Malé elektronické zařízení
+                        používané zaměstnanci
+                        s vysokým oprávněním.
+                    </p>
+
+                    <div class="clue-box">
+
+                        ACCESS
+                        <br>
+
+                        <strong>
+                            ROOT
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            `;
+
+            break;
+
+
+        /* =================================================
+           OSTATNÍ
+        ================================================= */
+
+        default:
+
+            html = `
+
+                <div class="item-detail">
+
+                    <div class="item-big-icon">
+                        ${item.icon}
+                    </div>
+
+                    <h2>
+                        ${item.name}
+                    </h2>
+
+                    <p>
+                        ${item.description}
+                    </p>
+
+                </div>
+
+            `;
+
+            break;
+
     }
 
 
-    modal.classList.remove("show");
+    openInventoryDetail(
+        html
+    );
 
-    modal.style.display = "none";
 }
 
 
 /* =========================================================
-   DETAIL INVENTÁŘE
+   STARÝ PRŮKAZ — ZADNÍ STRANA
 ========================================================= */
 
-function openInventoryDetail(content) {
+function turnOldID() {
+
+    setInventoryFlag(
+        "oldID_rear_seen",
+        true
+    );
+
+
+    openInventoryDetail(`
+
+        <div class="item-detail">
+
+            <div class="item-big-icon">
+                🪪
+            </div>
+
+            <div class="sector">
+                SECTOR 01 / REVERSE
+            </div>
+
+            <h2>
+                ZADNÍ STRANA
+            </h2>
+
+            <p>
+                Zadní strana je špinavá
+                a místy odřená.
+            </p>
+
+            <div class="clue-box">
+
+                <div class="damaged-text">
+                    INCID█NT: █7
+                </div>
+
+                <div class="damaged-text">
+                    DATE:
+                    1█ / 0█
+                </div>
+
+                <div class="damaged-text">
+                    AUTH:
+                    █7
+                </div>
+
+                <div class="damaged-text">
+                    SERIAL:
+                    4█29
+                </div>
+
+            </div>
+
+            <p>
+                Některé číslice jsou
+                poškozené nebo zakryté.
+            </p>
+
+            <p class="hint">
+                Několik údajů se opakuje.
+                Možná z nich dokážeš
+                něco odvodit.
+            </p>
+
+            <button
+                class="main-button"
+                onclick="
+                    closeInventoryDetail()
+                "
+            >
+
+                ZPĚT
+
+            </button>
+
+        </div>
+
+    `);
+
+}
+
+
+/* =========================================================
+   DETAIL MODAL
+========================================================= */
+
+function openInventoryDetail(
+    content
+) {
 
     let modal =
         document.getElementById(
@@ -798,7 +938,9 @@ function openInventoryDetail(content) {
     if (!modal) {
 
         modal =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         modal.id =
             "inventoryDetailModal";
@@ -806,17 +948,21 @@ function openInventoryDetail(content) {
         modal.className =
             "modal";
 
+
         modal.innerHTML = `
 
             <div class="modal-box">
 
-                <div id="inventoryDetailContent"></div>
+                <div
+                    id="inventoryDetailContent"
+                ></div>
 
                 <button
                     class="main-button"
                     onclick="
                         closeInventoryDetail()
-                    ">
+                    "
+                >
 
                     ZAVŘÍT
 
@@ -826,9 +972,11 @@ function openInventoryDetail(content) {
 
         `;
 
+
         document.body.appendChild(
             modal
         );
+
     }
 
 
@@ -852,11 +1000,12 @@ function openInventoryDetail(content) {
     modal.classList.add(
         "show"
     );
+
 }
 
 
 /* =========================================================
-   ZAVŘENÍ DETAILU
+   ZAVŘÍT DETAIL
 ========================================================= */
 
 function closeInventoryDetail() {
@@ -881,11 +1030,93 @@ function closeInventoryDetail() {
 
 
     renderInventory();
+
 }
 
 
 /* =========================================================
-   ZPRÁVA INVENTÁŘE
+   FLAGY INVENTÁŘE
+========================================================= */
+
+function loadInventoryFlags() {
+
+    const saved =
+        localStorage.getItem(
+            INVENTORY_FLAGS
+        );
+
+
+    if (!saved) {
+
+        return {};
+
+    }
+
+
+    try {
+
+        return JSON.parse(
+            saved
+        );
+
+    } catch {
+
+        return {};
+
+    }
+
+}
+
+
+function saveInventoryFlags(
+    flags
+) {
+
+    localStorage.setItem(
+        INVENTORY_FLAGS,
+        JSON.stringify(
+            flags
+        )
+    );
+
+}
+
+
+function setInventoryFlag(
+    id,
+    value = true
+) {
+
+    const flags =
+        loadInventoryFlags();
+
+
+    flags[id] =
+        value;
+
+
+    saveInventoryFlags(
+        flags
+    );
+
+}
+
+
+function getInventoryFlag(
+    id
+) {
+
+    const flags =
+        loadInventoryFlags();
+
+
+    return flags[id] === true;
+
+}
+
+
+/* =========================================================
+   ZPRÁVA
 ========================================================= */
 
 function showInventoryMessage(
@@ -901,43 +1132,18 @@ function showInventoryMessage(
 
     if (!box) {
 
-        alert(message);
-
         return;
 
     }
 
 
     box.className =
-        "inventory-message " + type;
+        "inventory-message " +
+        type;
+
 
     box.textContent =
         message;
-}
-
-
-/* =========================================================
-   INVENTÁŘNÍ FLAGY
-========================================================= */
-
-function setInventoryFlag(
-    id,
-    value = true
-) {
-
-    localStorage.setItem(
-        "BLACKOUT_INV_FLAG_" + id,
-        value ? "true" : "false"
-    );
-
-}
-
-
-function getInventoryFlag(id) {
-
-    return localStorage.getItem(
-        "BLACKOUT_INV_FLAG_" + id
-    ) === "true";
 
 }
 
@@ -946,10 +1152,14 @@ function getInventoryFlag(id) {
    POUŽITÍ PŘEDMĚTU
 ========================================================= */
 
-function useInventoryItem(itemId) {
+function useInventoryItem(
+    itemId
+) {
 
     const item =
-        getItem(itemId);
+        getItem(
+            itemId
+        );
 
 
     if (!item) {
@@ -959,7 +1169,7 @@ function useInventoryItem(itemId) {
             "error"
         );
 
-        return;
+        return false;
 
     }
 
@@ -969,23 +1179,29 @@ function useInventoryItem(itemId) {
         "function"
     ) {
 
-        const used =
+        const result =
             useItemForPuzzle(
                 itemId
             );
 
 
-        if (used) {
-            return;
+        if (result === true) {
+
+            return true;
+
         }
 
     }
 
 
     showInventoryMessage(
-        "Nevypadá to, že by se tento předmět dal právě teď použít.",
+        "Tento předmět se tady nedá použít.",
         "normal"
     );
+
+
+    return false;
+
 }
 
 
@@ -1003,11 +1219,13 @@ function resetInventory() {
     );
 
 
+    localStorage.removeItem(
+        INVENTORY_FLAGS
+    );
+
+
     /*
-       Synchronizace s rooms.js.
-       Tohle je důležité kvůli problému,
-       kdy inventář byl prázdný, ale místnost
-       stále tvrdila, že je předmět sebraný.
+       Synchronizace s místnostmi.
     */
 
     localStorage.removeItem(
@@ -1015,7 +1233,19 @@ function resetInventory() {
     );
 
 
+    if (
+        typeof collectedItems !==
+        "undefined"
+    ) {
+
+        collectedItems = [];
+
+    }
+
+
     renderInventory();
+
+    updateUI();
 
 
     if (
@@ -1045,135 +1275,67 @@ function resetInventory() {
 
 
 /* =========================================================
-   KOMPLETNÍ RESET HRY
+   KOMPLETNÍ RESET
 ========================================================= */
 
-function resetBlackoutGame() {
+function resetBlackoutInventory() {
 
-    /*
-       Smazání inventáře
-    */
-
-    localStorage.removeItem(
-        INVENTORY_STORAGE
-    );
+    resetInventory();
 
 
     /*
-       Smazání sebraných předmětů
-    */
-
-    localStorage.removeItem(
-        "BLACKOUT_ROOM_ITEMS"
-    );
-
-
-    /*
-       Smazání puzzle postupu
+       Puzzle postup
     */
 
     Object.keys(
         localStorage
-    ).forEach(key => {
+    ).forEach(
+        key => {
 
-        if (
-            key.startsWith(
-                "BLACKOUT_PUZZLE_"
-            )
-        ) {
+            if (
+                key.startsWith(
+                    "BLACKOUT_PUZZLE_"
+                )
+            ) {
 
-            localStorage.removeItem(
-                key
-            );
+                localStorage.removeItem(
+                    key
+                );
 
-        }
-
-        if (
-            key.startsWith(
-                "BLACKOUT_INV_FLAG_"
-            )
-        ) {
-
-            localStorage.removeItem(
-                key
-            );
+            }
 
         }
-
-    });
+    );
 
 
     /*
-       Smazání starších flagů používaných
-       případnými staršími verzemi hry.
+       Staré flagy.
     */
 
     Object.keys(
         localStorage
-    ).forEach(key => {
+    ).forEach(
+        key => {
 
-        if (
-            key.startsWith(
-                "BLACKOUT_FLAG_"
-            )
-        ) {
+            if (
+                key.startsWith(
+                    "BLACKOUT_INV_FLAG_"
+                )
+            ) {
 
-            localStorage.removeItem(
-                key
-            );
+                localStorage.removeItem(
+                    key
+                );
+
+            }
 
         }
-
-    });
-
-
-    inventory = [];
+    );
 
 
-    if (
-        typeof collectedItems !==
-        "undefined"
-    ) {
-
-        collectedItems = [];
-
-    }
-
-
-    renderInventory();
-
-
-    if (
-        typeof loadRoomItems ===
-        "function"
-    ) {
-
-        loadRoomItems();
-
-    }
-
-
-    if (
-        typeof currentRoom !==
-        "undefined"
-    ) {
-
-        currentRoom = "room1";
-
-    }
-
-
-    if (
-        typeof renderRoom ===
-        "function"
-    ) {
-
-        renderRoom("room1");
-
-    }
-
-
-    closeInventory();
+    console.log(
+        "BLACKOUT inventory reset complete."
+    );
 
 }
 
@@ -1189,6 +1351,8 @@ document.addEventListener(
         loadInventory();
 
         renderInventory();
+
+        updateUI();
 
     }
 );
