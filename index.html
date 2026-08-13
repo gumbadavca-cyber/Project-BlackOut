@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>PROJECT BLACKOUT</title>
+
+<style>
+
+*{
+ box-sizing:border-box;
+}
+
+html,body{
+ margin:0;
+ width:100%;
+ min-height:100%;
+ background:#020303;
+ color:#6dff7b;
+ font-family:monospace;
+}
+
+body{
+ padding:20px;
+}
+
+.container{
+ max-width:700px;
+ margin:auto;
+}
+
+.logo{
+ text-align:center;
+ margin-top:40px;
+}
+
+.logo h1{
+ font-size:clamp(38px,10vw,75px);
+ letter-spacing:6px;
+ margin:0;
+
+ text-shadow:
+ 0 0 10px #00ff33,
+ 0 0 30px #00ff33,
+ 0 0 60px #00ff33;
+}
+
+.logo p{
+ letter-spacing:4px;
+ color:#3cff55;
+}
+
+.terminal{
+ margin-top:35px;
+
+ background:#010501;
+
+ border:1px solid #174d20;
+
+ padding:20px;
+
+ line-height:1.8;
+
+ box-shadow:
+ 0 0 30px rgba(0,255,50,.08);
+}
+
+.warning{
+ color:#ff4242;
+
+ animation:blink 1s infinite;
+}
+
+button{
+ display:block;
+
+ margin:30px auto;
+
+ padding:16px 30px;
+
+ background:#031006;
+
+ border:1px solid #39ff55;
+
+ color:#65ff73;
+
+ font-family:monospace;
+
+ font-size:17px;
+
+ letter-spacing:2px;
+}
+
+button:active{
+ background:#39ff55;
+ color:#001000;
+}
+
+.hidden{
+ display:none;
+}
+
+@keyframes blink{
+
+ 0%,45%{
+  opacity:1;
+ }
+
+ 50%,100%{
+  opacity:.2;
+ }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+
+<h1>BLACKOUT</h1>
+
+<p>PROJECT // 07</p>
+
+</div>
+
+
+<div class="terminal">
+
+<div>
+&gt; BOOTING BLACKOUT FACILITY...
+</div>
+
+<div>
+&gt; POWER: <span style="color:#55ff69">
+ONLINE
+</span>
+</div>
+
+<div>
+&gt; COMMUNICATION:
+<span style="color:#ff4242">
+OFFLINE
+</span>
+</div>
+
+<div>
+&gt; SECURITY:
+<span style="color:#ff4242">
+LOCKDOWN
+</span>
+</div>
+
+<br>
+
+<div class="warning">
+⚠ EMERGENCY LOCKDOWN ⚠
+</div>
+
+<br>
+
+<div>
+YOU ARE NOT SUPPOSED TO BE HERE.
+</div>
+
+<br>
+
+<div>
+The facility has been locked down.
+</div>
+
+<div>
+The exit is sealed.
+</div>
+
+<div>
+Find a way out.
+</div>
+
+</div>
+
+
+<button onclick="startGame()">
+
+[ ENTER FACILITY ]
+
+</button>
+
+
+</div>
+
+
+<script>
+
+function startGame(){
+
+ alert(
+ "FACILITY ACCESS STARTED\n\n" +
+ "The first security door is locked."
+ );
+
+}
+
+</script>
+
+</body>
+</html>
