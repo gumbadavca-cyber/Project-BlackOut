@@ -3,6 +3,7 @@
 ========================================= */
 
 let inventory = [];
+let selectedItem = null;
 
 
 /* =========================================
@@ -11,19 +12,20 @@ let inventory = [];
 
 function addItem(item) {
 
-    if (inventory.includes(item)) {
-        return;
+    if (hasItem(item)) {
+        return false;
     }
 
     inventory.push(item);
 
     saveInventory();
 
+    playSound("pickup");
+    vibrate(35);
+
     renderInventory();
 
-    playSound("pickup");
-
-    vibrate(35);
+    return true;
 }
 
 
@@ -48,7 +50,7 @@ function removeItem(item) {
 
 
 /* =========================================
-   KONTROLA PŘEDMĚTU
+   MÁM PŘEDMĚT?
 ========================================= */
 
 function hasItem(item) {
@@ -77,6 +79,8 @@ function clearInventory() {
 
     inventory = [];
 
+    selectedItem = null;
+
     saveInventory();
 
     renderInventory();
@@ -85,7 +89,7 @@ function clearInventory() {
 
 
 /* =========================================
-   ULOŽENÍ INVENTÁŘE
+   ULOŽENÍ
 ========================================= */
 
 function saveInventory() {
@@ -99,7 +103,7 @@ function saveInventory() {
 
 
 /* =========================================
-   NAČTENÍ INVENTÁŘE
+   NAČTENÍ
 ========================================= */
 
 function loadInventory() {
@@ -115,8 +119,12 @@ function loadInventory() {
 
     try {
 
-        inventory =
+        const data =
             JSON.parse(saved);
+
+        if (Array.isArray(data)) {
+            inventory = data;
+        }
 
     } catch (error) {
 
@@ -128,7 +136,7 @@ function loadInventory() {
 
 
 /* =========================================
-   VYKRESLENÍ INVENTÁŘE
+   VYKRESLENÍ
 ========================================= */
 
 function renderInventory() {
@@ -155,13 +163,21 @@ function renderInventory() {
     }
 
 
-    box.innerHTML = "";
+    box.innerHTML = `
+        <div class="inventory-items"></div>
+    `;
+
+
+    const itemsBox =
+        box.querySelector(
+            ".inventory-items"
+        );
 
 
     inventory.forEach(item => {
 
         const element =
-            document.createElement("div");
+            document.createElement("button");
 
         element.className =
             "inventory-item";
@@ -175,7 +191,7 @@ function renderInventory() {
 
         };
 
-        box.appendChild(element);
+        itemsBox.appendChild(element);
 
     });
 
@@ -185,9 +201,6 @@ function renderInventory() {
 /* =========================================
    VYBRÁNÍ PŘEDMĚTU
 ========================================= */
-
-let selectedItem = null;
-
 
 function selectItem(item) {
 
@@ -207,7 +220,7 @@ function selectItem(item) {
 
     box.innerHTML = `
 
-        <div class="selected-item">
+        <div class="output show">
 
             <h3 class="green">
                 🎒 ${item}
@@ -217,34 +230,32 @@ function selectItem(item) {
                 Předmět je vybraný.
             </p>
 
-            <p class="gray">
-                Později ho budeš moct
-                použít na objekty v místnostech.
-            </p>
-
             <button
                 class="main-button"
-                onclick="closeInventory()">
+                onclick="clearSelectedItem(); renderInventory()">
 
-                ZPĚT DO HRY
+                ZRUŠIT VÝBĚR
 
             </button>
 
         </div>
 
-        <hr>
+        <br>
 
-        <h3 class="green">
-            TVÉ PŘEDMĚTY
-        </h3>
-
+        <div class="inventory-items"></div>
     `;
+
+
+    const itemsBox =
+        box.querySelector(
+            ".inventory-items"
+        );
 
 
     inventory.forEach(otherItem => {
 
         const element =
-            document.createElement("div");
+            document.createElement("button");
 
         element.className =
             "inventory-item";
@@ -258,7 +269,7 @@ function selectItem(item) {
 
         };
 
-        box.appendChild(element);
+        itemsBox.appendChild(element);
 
     });
 
@@ -272,22 +283,8 @@ function selectItem(item) {
 function useItem(item, target) {
 
     if (!hasItem(item)) {
-
         return false;
-
     }
-
-
-    /*
-       Tady budeme později přidávat
-       jednotlivé kombinace:
-
-       STARÝ PRŮKAZ + SKŘÍŇKA
-       ŠROUBOVÁK + PANEL
-       UV SVÍTILNA + STĚNA
-       ČIP + TERMINÁL
-       atd.
-    */
 
 
     if (
@@ -314,9 +311,7 @@ function useItem(item, target) {
 function useSelectedItem(target) {
 
     if (!selectedItem) {
-
         return false;
-
     }
 
 
@@ -342,7 +337,7 @@ function useSelectedItem(target) {
 
 
 /* =========================================
-   RESET VYBRANÉHO PŘEDMĚTU
+   ZRUŠENÍ VÝBĚRU
 ========================================= */
 
 function clearSelectedItem() {
@@ -353,7 +348,7 @@ function clearSelectedItem() {
 
 
 /* =========================================
-   START INVENTÁŘE
+   START
 ========================================= */
 
 document.addEventListener(
