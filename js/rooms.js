@@ -1,1109 +1,813 @@
 /* =========================================
-   BLACKOUT — MÍSTNOSTI
+   BLACKOUT — ROOMS SYSTEM
+========================================= */
+
+
+/* =========================================
+   DATA MÍSTNOSTÍ
+========================================= */
+
+const roomData = {
+
+    room1: {
+        name: "Probuzení",
+        sector: "SECTOR 01",
+        description:
+            "Probouzíš se v opuštěné místnosti. " +
+            "Světla blikají a dveře jsou zamčené.",
+
+        items: [
+            {
+                id: "oldID",
+                name: "Starý průkaz",
+                icon: "🪪",
+                description:
+                    "Starý zaměstnanecký průkaz. " +
+                    "Na zadní straně jsou podivné číslice."
+            }
+        ],
+
+        puzzle: "openTerminalPuzzle",
+
+        nextRoom: "room2"
+    },
+
+
+    room2: {
+        name: "Technická místnost",
+        sector: "SECTOR 02",
+        description:
+            "Stará technická místnost. " +
+            "Uprostřed stojí rozvaděč s odpojenými kabely.",
+
+        items: [
+            {
+                id: "fuse",
+                name: "Pojistka",
+                icon: "🔋",
+                description:
+                    "Starší průmyslová pojistka."
+            }
+        ],
+
+        puzzle: "openCablePuzzle",
+
+        nextRoom: "room3"
+    },
+
+
+    room3: {
+        name: "Bezpečnostní chodba",
+        sector: "SECTOR 03",
+        description:
+            "Dlouhá chodba plná bezpečnostních kamer. " +
+            "Na konci bliká červený panel.",
+
+        items: [
+            {
+                id: "securityCard",
+                name: "Bezpečnostní karta",
+                icon: "💳",
+                description:
+                    "Karta pro bezpečnostní systémy."
+            }
+        ],
+
+        puzzle: "openSecurityPuzzle",
+
+        nextRoom: "room4"
+    },
+
+
+    room4: {
+        name: "Laboratoř",
+        sector: "SECTOR 04",
+        description:
+            "Laboratoř je opuštěná. " +
+            "Na stole jsou čtyři označené lahvičky.",
+
+        items: [
+            {
+                id: "chemical",
+                name: "Aktivátor",
+                icon: "🧪",
+                description:
+                    "Neznámá chemická látka."
+            }
+        ],
+
+        puzzle: "openLabPuzzle",
+
+        nextRoom: "room5"
+    },
+
+
+    room5: {
+        name: "Archiv",
+        sector: "SECTOR 05",
+        description:
+            "Regály jsou plné starých dokumentů. " +
+            "Něco zde očividně někdo hledal.",
+
+        items: [
+            {
+                id: "incidentReport",
+                name: "INCIDENT 07",
+                icon: "📄",
+                description:
+                    "Utajený dokument o události v zařízení."
+            }
+        ],
+
+        puzzle: "openArchivePuzzle",
+
+        nextRoom: "room6"
+    },
+
+
+    room6: {
+        name: "Kontrolní centrum",
+        sector: "SECTOR 06",
+        description:
+            "Obrovská obrazovka stále funguje. " +
+            "Systém požaduje ROOT ACCESS.",
+
+        items: [
+            {
+                id: "accessToken",
+                name: "Přístupový token",
+                icon: "🔑",
+                description:
+                    "Token pro hlavní systém."
+            }
+        ],
+
+        puzzle: "openControlPuzzle",
+
+        nextRoom: "room7"
+    },
+
+
+    room7: {
+        name: "Podzemní tunel",
+        sector: "SECTOR 07",
+        description:
+            "Úzký tunel vede hluboko pod komplex. " +
+            "Před tebou jsou čtyři možné cesty.",
+
+        items: [],
+
+        puzzle: "openTunnelPuzzle",
+
+        nextRoom: "room8"
+    },
+
+
+    room8: {
+        name: "Hlavní výstup",
+        sector: "EXIT",
+        description:
+            "Konečně jsi u hlavního východu. " +
+            "Dveře ale stále vyžadují poslední potvrzení.",
+
+        items: [],
+
+        puzzle: "openEscapePuzzle",
+
+        nextRoom: null
+    }
+
+};
+
+
+/* =========================================
+   CO BYLO V MÍSTNOSTI SEBRÁNO
+========================================= */
+
+let collectedItems = [];
+
+
+/* =========================================
+   NAČTENÍ
+========================================= */
+
+function loadRoomItems() {
+
+    const saved =
+        localStorage.getItem(
+            "BLACKOUT_ROOM_ITEMS"
+        );
+
+
+    if (!saved) {
+
+        collectedItems = [];
+
+        return;
+
+    }
+
+
+    try {
+
+        const data =
+            JSON.parse(saved);
+
+
+        if (Array.isArray(data)) {
+
+            collectedItems = data;
+
+        } else {
+
+            collectedItems = [];
+
+        }
+
+    } catch {
+
+        collectedItems = [];
+
+    }
+
+}
+
+
+/* =========================================
+   ULOŽENÍ
+========================================= */
+
+function saveRoomItems() {
+
+    localStorage.setItem(
+        "BLACKOUT_ROOM_ITEMS",
+        JSON.stringify(
+            collectedItems
+        )
+    );
+
+}
+
+
+/* =========================================
+   BYL ITEM SEBRÁN?
+========================================= */
+
+function isItemCollected(itemId) {
+
+    return collectedItems.includes(
+        itemId
+    );
+
+}
+
+
+/* =========================================
+   VZÍT PŘEDMĚT
+========================================= */
+
+function takeItem(
+    itemId,
+    roomId = currentRoom
+) {
+
+    const room =
+        roomData[roomId];
+
+
+    if (!room) {
+        return;
+    }
+
+
+    const item =
+        room.items.find(
+            i => i.id === itemId
+        );
+
+
+    if (!item) {
+        return;
+    }
+
+
+    if (
+        isItemCollected(itemId)
+    ) {
+
+        playSound("error");
+
+        return;
+
+    }
+
+
+    collectedItems.push(
+        itemId
+    );
+
+
+    saveRoomItems();
+
+
+    /*
+       Přidání do inventáře.
+    */
+
+    if (
+        typeof addItem ===
+        "function"
+    ) {
+
+        addItem(
+            item.id,
+            item.name,
+            item.description,
+            item.icon
+        );
+
+    }
+
+
+    playSound("success");
+
+    vibrate(70);
+
+    flashScreen();
+
+
+    renderRoom(roomId);
+
+}
+
+
+/* =========================================
+   VYKRESLENÍ MÍSTNOSTI
 ========================================= */
 
 function renderRoom(roomId) {
 
-    const box =
+    const room =
+        roomData[roomId];
+
+
+    const container =
         document.getElementById(
             "roomContent"
         );
 
-    if (!box) return;
+
+    if (!room || !container) {
+        return;
+    }
 
 
-    switch (roomId) {
+    loadRoomItems();
 
-        case "room1":
-            renderRoom1(box);
-            break;
 
-        case "room2":
-            renderRoom2(box);
-            break;
+    const unlocked =
+        isRoomUnlocked(roomId);
 
-        case "room3":
-            renderRoom3(box);
-            break;
 
-        case "room4":
-            renderRoom4(box);
-            break;
+    if (!unlocked) {
 
-        case "room5":
-            renderRoom5(box);
-            break;
+        container.innerHTML = `
 
-        case "room6":
-            renderRoom6(box);
-            break;
+            <div class="room">
 
-        case "room7":
-            renderRoom7(box);
-            break;
+                <h1>🔒 MÍSTNOST UZAMČENA</h1>
 
-        case "room8":
-            renderRoom8(box);
-            break;
+                <p>
+                    Do této oblasti zatím nemáš přístup.
+                </p>
 
-        default:
+            </div>
 
-            box.innerHTML = `
-                <h2>CHYBA</h2>
-                <p>Tato místnost neexistuje.</p>
+        `;
+
+        return;
+
+    }
+
+
+    let itemsHTML = "";
+
+
+    room.items.forEach(
+        item => {
+
+            const collected =
+                isItemCollected(
+                    item.id
+                );
+
+
+            if (collected) {
+
+                itemsHTML += `
+
+                    <div class="room-item taken">
+
+                        <span>
+                            ${item.icon}
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                ${item.name}
+                            </strong>
+
+                            <small>
+                                SEBRÁNO
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            } else {
+
+                itemsHTML += `
+
+                    <div class="room-item">
+
+                        <span>
+                            ${item.icon}
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                ${item.name}
+                            </strong>
+
+                            <small>
+                                ${item.description}
+                            </small>
+
+                        </div>
+
+                        <button
+                            class="take-button"
+                            onclick="
+                                takeItem(
+                                    '${item.id}',
+                                    '${roomId}'
+                                )
+                            ">
+
+                            VZÍT
+
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+    );
+
+
+    const solved =
+        room.puzzle &&
+        typeof puzzleDone ===
+        "function" &&
+        puzzleDone(
+            getPuzzleId(room.puzzle)
+        );
+
+
+    container.innerHTML = `
+
+        <div class="room">
+
+            <div class="room-header">
+
+                <div>
+
+                    <div class="sector">
+                        ${room.sector}
+                    </div>
+
+                    <h1>
+                        ${room.name}
+                    </h1>
+
+                </div>
+
+                <div class="room-number">
+                    ${getRoomNumber(roomId)}
+                </div>
+
+            </div>
+
+
+            <div class="room-description">
+
+                <p>
+                    ${room.description}
+                </p>
+
+            </div>
+
+
+            ${
+                room.items.length > 0
+
+                ? `
+
+                    <div class="room-section">
+
+                        <h2>
+                            🔎 PŘEDMĚTY
+                        </h2>
+
+                        <div class="room-items">
+
+                            ${itemsHTML}
+
+                        </div>
+
+                    </div>
+
+                  `
+
+                : ""
+
+            }
+
+
+            <div class="room-section">
+
+                <h2>
+                    🧩 AKCE
+                </h2>
+
+
+                ${
+                    room.puzzle
+
+                    ? `
+
+                        <button
+                            class="main-button"
+                            onclick="${room.puzzle}()">
+
+                            ${
+                                solved
+                                    ? "✓ ZKONTROLOVAT"
+                                    : "🔍 PROZKOUMAT"
+                            }
+
+                        </button>
+
+                      `
+
+                    : ""
+
+                }
+
+            </div>
+
+
+            <div class="room-navigation">
+
+                ${createNavigation(
+                    roomId
+                )}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================
+   NAVIGACE MEZI MÍSTNOSTMI
+========================================= */
+
+function createNavigation(roomId) {
+
+    let html = "";
+
+
+    const number =
+        getRoomNumber(roomId);
+
+
+    if (number > 1) {
+
+        const previous =
+            "room" +
+            (number - 1);
+
+
+        if (
+            isRoomUnlocked(
+                previous
+            )
+        ) {
+
+            html += `
+
+                <button
+                    class="secondary-button"
+                    onclick="
+                        showRoom(
+                            '${previous}'
+                        )
+                    ">
+
+                    ← ZPĚT
+
+                </button>
+
             `;
 
-    }
+        }
 
-    rememberRoom(roomId);
-}
-
-
-/* =========================================
-   POMOCNÁ FUNKCE PRO PŘEDMĚT
-========================================= */
-
-function takeItem(item) {
-
-    if (hasItem(item)) {
-        return false;
-    }
-
-    addItem(item);
-
-    showRoom(currentRoom);
-
-    return true;
-}
-
-
-/* =========================================
-   ROOM 1
-========================================= */
-
-function renderRoom1(box) {
-
-    const badgeTaken =
-        hasItem("STARÝ PRŮKAZ");
-
-    const keyTaken =
-        hasItem("MALÝ KLÍČ");
-
-
-    box.innerHTML = `
-
-        <div class="room-title">
-            PROBUZENÍ
-        </div>
-
-        <div class="room-sector">
-            SECTOR 01
-        </div>
-
-        <div class="room-scene">
-            🛏️
-            <br>
-            MALÁ OBSERVAČNÍ MÍSTNOST
-        </div>
-
-        <div class="room-description">
-
-            Probudil ses na kovové posteli.
-
-            <br><br>
-
-            Světla blikají a ze stropu
-            je slyšet slabé bzučení.
-
-            <br><br>
-
-            Na stole leží několik
-            předmětů.
-
-            <br><br>
-
-            Dveře jsou elektronicky
-            zamčené.
-
-        </div>
-
-        <div class="actions">
-
-            <button
-                class="action-button"
-                onclick="inspectBed()">
-
-                🛏️ Prohlédnout postel
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="inspectDesk()">
-
-                🗄️ Prohlédnout stůl
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="inspectDoor()">
-
-                🚪 Prohlédnout dveře
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="searchRoom1()">
-
-                🔎 Prohledat místnost
-
-            </button>
-
-        </div>
-
-        <div id="room1Output" class="output"></div>
-
-    `;
-}
-
-
-/* =========================================
-   POSTEL
-========================================= */
-
-function inspectBed() {
-
-    const output =
-        document.getElementById(
-            "room1Output"
-        );
-
-    output.classList.add("show");
-
-
-    if (hasItem("STARÝ PRŮKAZ")) {
-
-        output.innerHTML = `
-
-            Pod matrací už nic dalšího není.
-
-            <br><br>
-
-            <span class="green">
-                ✓ STARÝ PRŮKAZ JSI UŽ VZAL
-            </span>
-
-        `;
-
-        return;
     }
 
 
-    output.innerHTML = `
+    const room =
+        roomData[roomId];
 
-        Pod matrací je něco schované.
 
-        <br><br>
+    if (
+        room.nextRoom &&
+        isRoomUnlocked(
+            room.nextRoom
+        )
+    ) {
 
-        Našel jsi:
-
-        <br><br>
-
-        <span class="green">
-            🪪 STARÝ PRŮKAZ
-        </span>
-
-        <br><br>
-
-        <button
-            class="main-button"
-            onclick="takeItem('STARÝ PRŮKAZ')">
-
-            VZÍT
-
-        </button>
-
-    `;
-}
-
-
-/* =========================================
-   STŮL
-========================================= */
-
-function inspectDesk() {
-
-    const output =
-        document.getElementById(
-            "room1Output"
-        );
-
-    output.classList.add("show");
-
-
-    if (hasItem("MALÝ KLÍČ")) {
-
-        output.innerHTML = `
-
-            Na stole už nic dalšího není.
-
-            <br><br>
-
-            <span class="green">
-                ✓ MALÝ KLÍČ JSI UŽ VZAL
-            </span>
-
-        `;
-
-        return;
-    }
-
-
-    output.innerHTML = `
-
-        Na stole leží starý zápisník.
-
-        <br><br>
-
-        Poslední zápis:
-
-        <br><br>
-
-        <span class="yellow">
-
-            „Když zhasnou světla,
-            hledej červenou značku.“
-
-        </span>
-
-        <br><br>
-
-        Vedle zápisníku je malý
-        kovový předmět.
-
-        <br><br>
-
-        <span class="green">
-            🔑 MALÝ KLÍČ
-        </span>
-
-        <br><br>
-
-        <button
-            class="main-button"
-            onclick="takeItem('MALÝ KLÍČ')">
-
-            VZÍT KLÍČ
-
-        </button>
-
-    `;
-}
-
-
-/* =========================================
-   DVEŘE
-========================================= */
-
-function inspectDoor() {
-
-    const output =
-        document.getElementById(
-            "room1Output"
-        );
-
-    output.classList.add("show");
-
-
-    output.innerHTML = `
-
-        Dveře jsou zamčené.
-
-        <br><br>
-
-        Vedle nich je
-        elektronická čtečka.
-
-        <br><br>
-
-        <span class="red">
-            PŘÍSTUP ODEPŘEN
-        </span>
-
-    `;
-}
-
-
-/* =========================================
-   PROHLEDÁNÍ
-========================================= */
-
-function searchRoom1() {
-
-    const output =
-        document.getElementById(
-            "room1Output"
-        );
-
-    output.classList.add("show");
-
-
-    output.innerHTML = `
-
-        Prohledáváš místnost...
-
-        <br><br>
-
-        Všiml sis malé
-
-        <span class="red">
-            červené značky
-        </span>
-
-        na stěně.
-
-        <br><br>
-
-        Možná bude později důležitá.
-
-    `;
-}
-
-
-/* =========================================
-   ROOM 2
-========================================= */
-
-function renderRoom2(box) {
-
-    box.innerHTML = `
-
-        <div class="room-title">
-            TECHNICKÁ MÍSTNOST
-        </div>
-
-        <div class="room-sector">
-            SECTOR 02
-        </div>
-
-        <div class="room-scene">
-            🔌
-            <br>
-            ELEKTRICKÝ PANEL
-        </div>
-
-        <div class="room-description">
-
-            Tady je srdce elektrického
-            systému zařízení.
-
-            <br><br>
-
-            Na zdi je panel
-            s odpojenými kabely.
-
-        </div>
-
-        <div class="actions">
+        html += `
 
             <button
-                class="action-button"
-                onclick="openCablePuzzle()">
-
-                🔌 Zapojit kabely
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="searchTechnicalRoom()">
-
-                🔎 Prohledat místnost
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="openInventory()">
-
-                🎒 Inventář
-
-            </button>
-
-        </div>
-
-        <div id="room2Output" class="output"></div>
-
-    `;
-}
-
-
-function searchTechnicalRoom() {
-
-    const output =
-        document.getElementById(
-            "room2Output"
-        );
-
-    output.classList.add("show");
-
-
-    output.innerHTML = `
-
-        Za panelem něco je.
-
-        <br><br>
-
-        Potřeboval bys nástroj,
-        kterým bys mohl panel otevřít.
-
-        <br><br>
-
-        <span class="yellow">
-            Možná šroubovák...
-        </span>
-
-    `;
-}
-
-
-/* =========================================
-   ROOM 3
-========================================= */
-
-function renderRoom3(box) {
-
-    box.innerHTML = `
-
-        <div class="room-title">
-            BEZPEČNOSTNÍ CHODBA
-        </div>
-
-        <div class="room-sector">
-            SECTOR 03
-        </div>
-
-        <div class="room-scene">
-            🚪 🚨 🚪
-        </div>
-
-        <div class="room-description">
-
-            Dlouhá chodba.
-
-            <br><br>
-
-            Některé bezpečnostní
-            kamery stále fungují.
-
-        </div>
-
-        <div class="actions">
-
-            <button
-                class="action-button"
-                onclick="inspectSecurityDoor()">
-
-                🚪 Prohlédnout dveře
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="inspectCamera()">
-
-                📹 Prohlédnout kameru
-
-            </button>
-
-        </div>
-
-        <div id="room3Output" class="output"></div>
-
-    `;
-}
-
-
-function inspectSecurityDoor() {
-
-    const output =
-        document.getElementById(
-            "room3Output"
-        );
-
-    output.classList.add("show");
-
-
-    if (hasItem("PŘÍSTUPOVÝ ČIP")) {
-
-        output.innerHTML = `
-
-            Čtečka rozpoznala čip.
-
-            <br><br>
-
-            <span class="green">
-                PŘÍSTUP POVOLEN
-            </span>
-
-            <br><br>
-
-            <button
-                class="main-button"
+                class="secondary-button"
                 onclick="
-                    unlockRoom('room4');
-                    showRoom('room4');
+                    showRoom(
+                        '${room.nextRoom}'
+                    )
                 ">
 
-                OTEVŘÍT DVEŘE
+                DÁL →
 
             </button>
-
-        `;
-
-    } else {
-
-        output.innerHTML = `
-
-            <span class="red">
-                PŘÍSTUP ODEPŘEN
-            </span>
-
-            <br><br>
-
-            Potřebuješ přístupový čip.
 
         `;
 
     }
-}
 
 
-function inspectCamera() {
+    return html;
 
-    const output =
-        document.getElementById(
-            "room3Output"
-        );
-
-    output.classList.add("show");
-
-    output.innerHTML = `
-
-        Kamera tě sleduje.
-
-        <br><br>
-
-        Na jejím krytu je vyrytý symbol:
-
-        <br><br>
-
-        <span class="yellow">
-            △ 07 △
-        </span>
-
-    `;
 }
 
 
 /* =========================================
-   ROOM 4
+   ČÍSLO MÍSTNOSTI
 ========================================= */
 
-function renderRoom4(box) {
+function getRoomNumber(roomId) {
 
-    box.innerHTML = `
+    const match =
+        roomId.match(
+            /room(\d+)/
+        );
 
-        <div class="room-title">
-            LABORATOŘ
-        </div>
 
-        <div class="room-sector">
-            SECTOR 04
-        </div>
+    return match
+        ? match[1].padStart(
+            2,
+            "0"
+        )
+        : "00";
 
-        <div class="room-scene">
-            🧪 💻 🧬
-        </div>
-
-        <div class="room-description">
-
-            Regály jsou plné
-            zaprášených vzorků.
-
-            <br><br>
-
-            Uprostřed místnosti stojí
-            počítač.
-
-        </div>
-
-        <div class="actions">
-
-            <button
-                class="action-button"
-                onclick="takeUV()">
-
-                🔦 Vzít UV svítilnu
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="inspectComputer()">
-
-                💻 Prohlédnout počítač
-
-            </button>
-
-            <button
-                class="action-button"
-                onclick="searchLab()">
-
-                🔎 Prohledat laboratoř
-
-            </button>
-
-        </div>
-
-        <div id="room4Output" class="output"></div>
-
-    `;
 }
 
 
-function takeUV() {
+/* =========================================
+   ID PUZZLU PODLE FUNKCE
+========================================= */
 
-    const output =
-        document.getElementById(
-            "room4Output"
-        );
+function getPuzzleId(
+    puzzleFunction
+) {
 
-    if (hasItem("UV SVÍTILNA")) {
+    const map = {
 
-        output.classList.add("show");
+        openTerminalPuzzle:
+            "terminal",
 
-        output.innerHTML = `
-            <span class="green">
-                ✓ UV SVÍTILNU JSI UŽ VZAL
-            </span>
-        `;
+        openCablePuzzle:
+            "cables",
 
+        openSecurityPuzzle:
+            "security",
+
+        openLabPuzzle:
+            "lab",
+
+        openArchivePuzzle:
+            "archive",
+
+        openControlPuzzle:
+            "control",
+
+        openTunnelPuzzle:
+            "tunnel",
+
+        openEscapePuzzle:
+            "escape"
+
+    };
+
+
+    return map[
+        puzzleFunction
+    ] || "";
+
+}
+
+
+/* =========================================
+   ODEMKNUTÍ DALŠÍ MÍSTNOSTI
+========================================= */
+
+function unlockNextRoom() {
+
+    const room =
+        roomData[currentRoom];
+
+
+    if (!room || !room.nextRoom) {
         return;
     }
 
 
-    takeItem("UV SVÍTILNA");
+    unlockRoom(
+        room.nextRoom
+    );
 
-    output.classList.add("show");
-
-    output.innerHTML = `
-
-        🔦 Vzal jsi UV svítilnu.
-
-        <br><br>
-
-        Možná odhalí něco,
-        co normální světlo neukáže.
-
-    `;
 }
 
 
-function inspectComputer() {
+/* =========================================
+   AUTOMATICKÉ ODEMKNUTÍ
+========================================= */
 
-    const output =
-        document.getElementById(
-            "room4Output"
+function checkRoomProgress() {
+
+    const room =
+        roomData[currentRoom];
+
+
+    if (!room || !room.puzzle) {
+        return;
+    }
+
+
+    const puzzleId =
+        getPuzzleId(
+            room.puzzle
         );
 
-    output.classList.add("show");
 
-    output.innerHTML = `
+    if (
+        puzzleId &&
+        puzzleDone(puzzleId)
+    ) {
 
-        Počítač vyžaduje
-        přístupový kód.
+        if (room.nextRoom) {
 
-        <br><br>
+            unlockRoom(
+                room.nextRoom
+            );
 
-        <button
-            class="main-button"
-            onclick="
-                openCodePuzzle(
-                    'LABORATORNÍ TERMINÁL',
-                    4,
-                    '0427'
-                )
-            ">
-
-            ZADAT KÓD
-
-        </button>
-
-    `;
-}
-
-
-function searchLab() {
-
-    const output =
-        document.getElementById(
-            "room4Output"
-        );
-
-    output.classList.add("show");
-
-
-    if (hasItem("UV SVÍTILNA")) {
-
-        output.innerHTML = `
-
-            Posvítíš UV světlem
-            na stěnu.
-
-            <br><br>
-
-            Objeví se skrytý nápis:
-
-            <br><br>
-
-            <span class="yellow">
-                04 — 27
-            </span>
-
-        `;
-
-    } else {
-
-        output.innerHTML = `
-
-            Nic zvláštního nevidíš.
-
-            <br><br>
-
-            <span class="gray">
-                Možná potřebuješ
-                speciální světlo.
-            </span>
-
-        `;
+        }
 
     }
+
 }
 
 
 /* =========================================
-   ROOM 5
+   START ROOM SYSTEM
 ========================================= */
 
-function renderRoom5(box) {
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
 
-    box.innerHTML = `
+        loadRoomItems();
 
-        <div class="room-title">
-            ARCHIV
-        </div>
-
-        <div class="room-sector">
-            SECTOR 05
-        </div>
-
-        <div class="room-scene">
-            📁 🗄️ 📄
-        </div>
-
-        <div class="room-description">
-
-            Police jsou plné
-            dokumentů.
-
-        </div>
-
-        <div class="actions">
-
-            <button
-                class="action-button"
-                onclick="searchArchive()">
-
-                📁 Hledat dokumenty
-
-            </button>
-
-        </div>
-
-        <div id="room5Output" class="output"></div>
-
-    `;
-}
-
-
-function searchArchive() {
-
-    const output =
-        document.getElementById(
-            "room5Output"
-        );
-
-    output.classList.add("show");
-
-    output.innerHTML = `
-
-        Našel jsi starý spis.
-
-        <br><br>
-
-        <span class="red">
-            INCIDENT 07
-        </span>
-
-        <br><br>
-
-        V roce 2009 nedošlo
-        k obyčejné technické závadě.
-
-        <br><br>
-
-        Celé zařízení bylo
-        uzavřeno kvůli experimentu.
-
-        <br><br>
-
-        <span class="yellow">
-            Experiment nebyl nikdy
-            oficiálně ukončen.
-        </span>
-
-    `;
-}
-
-
-/* =========================================
-   ROOM 6
-========================================= */
-
-function renderRoom6(box) {
-
-    box.innerHTML = `
-
-        <div class="room-title">
-            KONTROLNÍ CENTRUM
-        </div>
-
-        <div class="room-sector">
-            SECTOR 06
-        </div>
-
-        <div class="room-scene">
-            💻 📡 🚨
-        </div>
-
-        <div class="room-description">
-
-            Obrovská obrazovka
-            pokrývá celou stěnu.
-
-        </div>
-
-        <div class="actions">
-
-            <button
-                class="action-button"
-                onclick="inspectControl()">
-
-                💻 Aktivovat terminál
-
-            </button>
-
-        </div>
-
-        <div id="room6Output" class="output"></div>
-
-    `;
-}
-
-
-function inspectControl() {
-
-    const output =
-        document.getElementById(
-            "room6Output"
-        );
-
-    output.classList.add("show");
-
-    output.innerHTML = `
-
-        Terminál se zapnul.
-
-        <br><br>
-
-        <span class="red">
-            SUBJECT STATUS: UNKNOWN
-        </span>
-
-        <br><br>
-
-        <span class="yellow">
-            „NĚKDO JE STÁLE UVNITŘ.“
-        </span>
-
-    `;
-}
-
-
-/* =========================================
-   ROOM 7
-========================================= */
-
-function renderRoom7(box) {
-
-    box.innerHTML = `
-
-        <div class="room-title">
-            PODZEMNÍ TUNEL
-        </div>
-
-        <div class="room-sector">
-            SECTOR 07
-        </div>
-
-        <div class="room-scene">
-            🚇 💡 🌑
-        </div>
-
-        <div class="room-description">
-
-            Úzký tunel vede hluboko
-            pod zařízením.
-
-        </div>
-
-        <div class="actions">
-
-            <button
-                class="action-button"
-                onclick="exploreTunnel()">
-
-                🚶 Jít dál
-
-            </button>
-
-        </div>
-
-        <div id="room7Output" class="output"></div>
-
-    `;
-}
-
-
-function exploreTunnel() {
-
-    const output =
-        document.getElementById(
-            "room7Output"
-        );
-
-    output.classList.add("show");
-
-    output.innerHTML = `
-
-        Jdeš tunelem.
-
-        <br><br>
-
-        Na konci vidíš kovové dveře.
-
-        <br><br>
-
-        <span class="green">
-            EMERGENCY EXIT
-        </span>
-
-    `;
-}
-
-
-/* =========================================
-   ROOM 8
-========================================= */
-
-function renderRoom8(box) {
-
-    box.innerHTML = `
-
-        <div class="room-title">
-            VÝSTUP
-        </div>
-
-        <div class="room-sector">
-            EMERGENCY EXIT
-        </div>
-
-        <div class="room-scene">
-            🚨 🚪 🌌
-        </div>
-
-        <div class="room-description">
-
-            Stojíš před posledními dveřmi.
-
-            <br><br>
-
-            Za nimi je venkovní prostor.
-
-        </div>
-
-        <div class="actions">
-
-            <button
-                class="action-button"
-                onclick="finalDoor()">
-
-                🚪 Otevřít dveře
-
-            </button>
-
-        </div>
-
-        <div id="room8Output" class="output"></div>
-
-    `;
-}
-
-
-function finalDoor() {
-
-    const output =
-        document.getElementById(
-            "room8Output"
-        );
-
-    output.classList.add("show");
-
-    output.innerHTML = `
-
-        <span class="green">
-            AUTORIZACE POTVRZENA
-        </span>
-
-        <br><br>
-
-        Dveře se otevřely.
-
-        <br><br>
-
-        <span class="yellow">
-            DOKÁZAL JSI UTÉCT.
-        </span>
-
-    `;
-
-    completeRoom("room8");
-
-    playSound("success");
-
-    flashScreen();
-
-}
+    }
+);
