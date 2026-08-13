@@ -1,21 +1,15 @@
 /* =========================================
-   BLACKOUT — HLAVNÍ ENGINE
+   BLACKOUT — HLAVNÍ GAME ENGINE
 ========================================= */
 
 let currentRoom = "room1";
 
 let gameState = {
-
     completedRooms: [],
-
-    roomsUnlocked: [
-        "room1"
-    ],
-
+    roomsUnlocked: ["room1"],
     roomHistory: [],
-
-    flags: {}
-
+    flags: {},
+    started: false
 };
 
 
@@ -27,18 +21,57 @@ function startGame() {
 
     loadGame();
 
-    loadInventory();
+    if (typeof loadInventory === "function") {
+        loadInventory();
+    }
 
-    loadSettings();
+    if (typeof loadSettings === "function") {
+        loadSettings();
+    }
 
-    currentRoom =
+
+    gameState.started = true;
+
+
+    if (
+        gameState.roomHistory &&
         gameState.roomHistory.length > 0
-            ? gameState.roomHistory[
+    ) {
+
+        currentRoom =
+            gameState.roomHistory[
                 gameState.roomHistory.length - 1
-              ]
-            : "room1";
+            ];
+
+    } else {
+
+        currentRoom = "room1";
+
+    }
+
+
+    const intro =
+        document.getElementById("intro");
+
+    const gameScreen =
+        document.getElementById("gameScreen");
+
+
+    if (intro) {
+        intro.classList.remove("active");
+        intro.style.display = "none";
+    }
+
+
+    if (gameScreen) {
+        gameScreen.classList.add("active");
+        gameScreen.style.display = "block";
+    }
+
 
     showRoom(currentRoom);
+
+    saveGame();
 
     playSound("click");
 
@@ -71,38 +104,30 @@ function showRoom(roomId) {
     rememberRoom(roomId);
 
 
-    const roomScreen =
-        document.getElementById(
-            "roomScreen"
-        );
+    const intro =
+        document.getElementById("intro");
+
+    const gameScreen =
+        document.getElementById("gameScreen");
 
 
-    const menuScreen =
-        document.getElementById(
-            "menuScreen"
-        );
+    if (intro) {
 
-
-    if (menuScreen) {
-
-        menuScreen.style.display =
-            "none";
+        intro.classList.remove("active");
+        intro.style.display = "none";
 
     }
 
 
-    if (roomScreen) {
+    if (gameScreen) {
 
-        roomScreen.style.display =
-            "block";
+        gameScreen.classList.add("active");
+        gameScreen.style.display = "block";
 
     }
 
 
-    if (
-        typeof renderRoom ===
-        "function"
-    ) {
+    if (typeof renderRoom === "function") {
 
         renderRoom(roomId);
 
@@ -117,51 +142,38 @@ function showRoom(roomId) {
 
 
 /* =========================================
-   OTEVŘENÍ MAPY
+   MAPA
 ========================================= */
 
 function openMap() {
 
     const modal =
-        document.getElementById(
-            "mapModal"
-        );
+        document.getElementById("mapModal");
 
 
     if (!modal) {
-
-        console.warn(
-            "mapModal nebyl nalezen."
-        );
-
         return;
-
     }
 
 
     modal.classList.add("show");
-
-    modal.style.display =
-        "flex";
+    modal.style.display = "flex";
 
 
-    renderMap();
+    if (typeof renderMap === "function") {
+        renderMap();
+    }
+
 
     playSound("click");
 
 }
 
 
-/* =========================================
-   ZAVŘENÍ MAPY
-========================================= */
-
 function closeMap() {
 
     const modal =
-        document.getElementById(
-            "mapModal"
-        );
+        document.getElementById("mapModal");
 
 
     if (!modal) {
@@ -169,12 +181,28 @@ function closeMap() {
     }
 
 
-    modal.classList.remove(
-        "show"
-    );
+    modal.classList.remove("show");
+    modal.style.display = "none";
 
-    modal.style.display =
-        "none";
+}
+
+
+function updateMap() {
+
+    const modal =
+        document.getElementById("mapModal");
+
+
+    if (
+        modal &&
+        modal.classList.contains("show")
+    ) {
+
+        if (typeof renderMap === "function") {
+            renderMap();
+        }
+
+    }
 
 }
 
@@ -192,25 +220,23 @@ function openSettings() {
 
 
     if (!modal) {
-
-        console.warn(
-            "settingsModal nebyl nalezen."
-        );
-
         return;
-
     }
 
 
-    modal.classList.add(
-        "show"
-    );
-
-    modal.style.display =
-        "flex";
+    modal.classList.add("show");
+    modal.style.display = "flex";
 
 
-    renderSettings();
+    if (
+        typeof renderSettings ===
+        "function"
+    ) {
+
+        renderSettings();
+
+    }
+
 
     playSound("click");
 
@@ -230,12 +256,8 @@ function closeSettings() {
     }
 
 
-    modal.classList.remove(
-        "show"
-    );
-
-    modal.style.display =
-        "none";
+    modal.classList.remove("show");
+    modal.style.display = "none";
 
 }
 
@@ -253,25 +275,23 @@ function openInventory() {
 
 
     if (!modal) {
-
-        console.warn(
-            "inventoryModal nebyl nalezen."
-        );
-
         return;
-
     }
 
 
-    modal.classList.add(
-        "show"
-    );
-
-    modal.style.display =
-        "flex";
+    modal.classList.add("show");
+    modal.style.display = "flex";
 
 
-    renderInventory();
+    if (
+        typeof renderInventory ===
+        "function"
+    ) {
+
+        renderInventory();
+
+    }
+
 
     playSound("click");
 
@@ -291,31 +311,25 @@ function closeInventory() {
     }
 
 
-    modal.classList.remove(
-        "show"
-    );
-
-    modal.style.display =
-        "none";
+    modal.classList.remove("show");
+    modal.style.display = "none";
 
 }
 
 
 /* =========================================
-   MÍSTNOST ODEMČENA?
+   ODEMKNUTÍ MÍSTNOSTÍ
 ========================================= */
 
 function isRoomUnlocked(roomId) {
 
-    return gameState.roomsUnlocked
-        .includes(roomId);
+    return (
+        gameState.roomsUnlocked
+            .includes(roomId)
+    );
 
 }
 
-
-/* =========================================
-   ODEMKNUTÍ MÍSTNOSTI
-========================================= */
 
 function unlockRoom(roomId) {
 
@@ -332,7 +346,7 @@ function unlockRoom(roomId) {
 
         playSound("success");
 
-        vibrate(80);
+        vibrate(70);
 
     }
 
@@ -341,10 +355,6 @@ function unlockRoom(roomId) {
 
 }
 
-
-/* =========================================
-   DOKONČENÍ MÍSTNOSTI
-========================================= */
 
 function completeRoom(roomId) {
 
@@ -368,6 +378,39 @@ function completeRoom(roomId) {
 
 
 /* =========================================
+   HISTORIE MÍSTNOSTÍ
+========================================= */
+
+function rememberRoom(roomId) {
+
+    if (!gameState.roomHistory) {
+
+        gameState.roomHistory = [];
+
+    }
+
+
+    const last =
+        gameState.roomHistory[
+            gameState.roomHistory.length - 1
+        ];
+
+
+    if (last !== roomId) {
+
+        gameState.roomHistory.push(
+            roomId
+        );
+
+    }
+
+
+    saveGame();
+
+}
+
+
+/* =========================================
    FLAGS
 ========================================= */
 
@@ -383,14 +426,16 @@ function setFlag(name, value = true) {
 
 function getFlag(name) {
 
-    return gameState.flags[name] ||
-        false;
+    return (
+        gameState.flags[name] ||
+        false
+    );
 
 }
 
 
 /* =========================================
-   ULOŽENÍ HRY
+   SAVE
 ========================================= */
 
 function saveGame() {
@@ -404,7 +449,7 @@ function saveGame() {
 
 
 /* =========================================
-   NAČTENÍ HRY
+   LOAD
 ========================================= */
 
 function loadGame() {
@@ -422,49 +467,50 @@ function loadGame() {
 
     try {
 
-        const loaded =
+        const data =
             JSON.parse(saved);
 
 
-        if (
-            loaded &&
-            typeof loaded === "object"
-        ) {
+        if (!data) {
+            return;
+        }
 
-            gameState = {
 
-                completedRooms:
-                    Array.isArray(
-                        loaded.completedRooms
-                    )
-                    ? loaded.completedRooms
+        gameState = {
+
+            completedRooms:
+                Array.isArray(
+                    data.completedRooms
+                )
+                    ? data.completedRooms
                     : [],
 
-                roomsUnlocked:
-                    Array.isArray(
-                        loaded.roomsUnlocked
-                    )
-                    ? loaded.roomsUnlocked
+            roomsUnlocked:
+                Array.isArray(
+                    data.roomsUnlocked
+                )
+                    ? data.roomsUnlocked
                     : ["room1"],
 
-                roomHistory:
-                    Array.isArray(
-                        loaded.roomHistory
-                    )
-                    ? loaded.roomHistory
+            roomHistory:
+                Array.isArray(
+                    data.roomHistory
+                )
+                    ? data.roomHistory
                     : [],
 
-                flags:
-                    loaded.flags || {}
+            flags:
+                data.flags || {},
 
-            };
+            started:
+                data.started === true
 
-        }
+        };
 
     } catch (error) {
 
         console.error(
-            "Chyba při načítání hry:",
+            "BLACKOUT save error:",
             error
         );
 
@@ -474,18 +520,18 @@ function loadGame() {
 
 
 /* =========================================
-   RESET HRY
+   RESET
 ========================================= */
 
 function resetGame() {
 
-    const confirmed =
+    const answer =
         confirm(
             "Opravdu chceš smazat celý postup?"
         );
 
 
-    if (!confirmed) {
+    if (!answer) {
         return;
     }
 
@@ -503,52 +549,58 @@ function resetGame() {
 
         completedRooms: [],
 
-        roomsUnlocked: [
-            "room1"
-        ],
+        roomsUnlocked: ["room1"],
 
         roomHistory: [],
 
-        flags: {}
+        flags: {},
+
+        started: false
 
     };
 
 
-    inventory = [];
-
-    selectedItem = null;
-
     currentRoom = "room1";
 
 
-    closeSettings();
+    if (typeof inventory !== "undefined") {
+        inventory = [];
+    }
 
-    closeInventory();
+
+    if (
+        typeof selectedItem !==
+        "undefined"
+    ) {
+        selectedItem = null;
+    }
+
 
     closeMap();
+    closeSettings();
+    closeInventory();
 
 
-    showRoom(
-        "room1"
-    );
+    const intro =
+        document.getElementById("intro");
+
+    const gameScreen =
+        document.getElementById("gameScreen");
+
+
+    if (gameScreen) {
+        gameScreen.style.display = "none";
+        gameScreen.classList.remove("active");
+    }
+
+
+    if (intro) {
+        intro.style.display = "block";
+        intro.classList.add("active");
+    }
 
 
     playSound("click");
-
-}
-
-
-/* =========================================
-   ZPĚT DO HRY
-========================================= */
-
-function backToGame() {
-
-    closeMap();
-
-    closeSettings();
-
-    closeInventory();
 
 }
 
@@ -562,7 +614,7 @@ function playSound(type) {
     if (
         typeof soundEnabled !==
         "undefined" &&
-        !soundEnabled
+        soundEnabled === false
     ) {
 
         return;
@@ -586,12 +638,12 @@ function playSound(type) {
    VIBRACE
 ========================================= */
 
-function vibrate(time = 50) {
+function vibrate(duration = 50) {
 
     if (
         typeof vibrationEnabled !==
         "undefined" &&
-        !vibrationEnabled
+        vibrationEnabled === false
     ) {
 
         return;
@@ -600,12 +652,12 @@ function vibrate(time = 50) {
 
 
     if (
-        navigator &&
+        typeof navigator !== "undefined" &&
         typeof navigator.vibrate ===
         "function"
     ) {
 
-        navigator.vibrate(time);
+        navigator.vibrate(duration);
 
     }
 
@@ -613,7 +665,7 @@ function vibrate(time = 50) {
 
 
 /* =========================================
-   EFEKT OBRAZOVKY
+   EFEKT
 ========================================= */
 
 function flashScreen() {
@@ -621,7 +673,7 @@ function flashScreen() {
     if (
         typeof effectsEnabled !==
         "undefined" &&
-        !effectsEnabled
+        effectsEnabled === false
     ) {
 
         return;
@@ -630,9 +682,7 @@ function flashScreen() {
 
 
     const flash =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     flash.className =
@@ -646,9 +696,7 @@ function flashScreen() {
 
     setTimeout(
         () => {
-
             flash.remove();
-
         },
         250
     );
@@ -657,29 +705,10 @@ function flashScreen() {
 
 
 /* =========================================
-   AKTUALIZACE UI
+   UI
 ========================================= */
 
 function updateUI() {
-
-    const roomName =
-        document.getElementById(
-            "currentRoomName"
-        );
-
-
-    if (
-        roomName &&
-        typeof rooms !==
-        "undefined" &&
-        rooms[currentRoom]
-    ) {
-
-        roomName.textContent =
-            rooms[currentRoom].name;
-
-    }
-
 
     const counter =
         document.getElementById(
@@ -702,24 +731,19 @@ function updateUI() {
 
 
 /* =========================================
-   ESC = ZAVŘÍT OKNO
+   ESC
 ========================================= */
 
 document.addEventListener(
     "keydown",
-    event => {
+    function(event) {
 
-        if (
-            event.key !== "Escape"
-        ) {
+        if (event.key !== "Escape") {
             return;
         }
 
-
         closeMap();
-
         closeSettings();
-
         closeInventory();
 
     }
@@ -727,18 +751,28 @@ document.addEventListener(
 
 
 /* =========================================
-   START PO NAČTENÍ
+   PO NAČTENÍ STRÁNKY
 ========================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function() {
 
         loadGame();
 
-        loadInventory();
+        if (
+            typeof loadInventory ===
+            "function"
+        ) {
+            loadInventory();
+        }
 
-        loadSettings();
+        if (
+            typeof loadSettings ===
+            "function"
+        ) {
+            loadSettings();
+        }
 
         updateUI();
 
