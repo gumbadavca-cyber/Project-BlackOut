@@ -1,5 +1,5 @@
 /* =========================================
-   BLACKOUT — INVENTÁŘ
+   BLACKOUT — INVENTORY SYSTEM
 ========================================= */
 
 let inventory = [];
@@ -7,89 +7,42 @@ let selectedItem = null;
 
 
 /* =========================================
-   PŘIDÁNÍ PŘEDMĚTU
+   NAČTENÍ INVENTÁŘE
 ========================================= */
 
-function addItem(item) {
+function loadInventory() {
 
-    if (hasItem(item)) {
-        return false;
-    }
+    const saved =
+        localStorage.getItem(
+            "BLACKOUT_INVENTORY"
+        );
 
-    inventory.push(item);
-
-    saveInventory();
-
-    playSound("pickup");
-    vibrate(35);
-
-    renderInventory();
-
-    return true;
-}
-
-
-/* =========================================
-   ODEBRÁNÍ PŘEDMĚTU
-========================================= */
-
-function removeItem(item) {
-
-    const index = inventory.indexOf(item);
-
-    if (index === -1) {
+    if (!saved) {
+        inventory = [];
         return;
     }
 
-    inventory.splice(index, 1);
+    try {
 
-    saveInventory();
+        const data =
+            JSON.parse(saved);
 
-    renderInventory();
-}
+        inventory =
+            Array.isArray(data)
+                ? data
+                : [];
 
+    } catch {
 
-/* =========================================
-   MÁM PŘEDMĚT?
-========================================= */
+        inventory = [];
 
-function hasItem(item) {
-
-    return inventory.includes(item);
-
-}
-
-
-/* =========================================
-   POČET PŘEDMĚTŮ
-========================================= */
-
-function inventoryCount() {
-
-    return inventory.length;
+    }
 
 }
 
 
 /* =========================================
-   VYMAZÁNÍ INVENTÁŘE
-========================================= */
-
-function clearInventory() {
-
-    inventory = [];
-
-    selectedItem = null;
-
-    saveInventory();
-
-    renderInventory();
-
-}
-
-
-/* =========================================
-   ULOŽENÍ
+   ULOŽENÍ INVENTÁŘE
 ========================================= */
 
 function saveInventory() {
@@ -103,34 +56,159 @@ function saveInventory() {
 
 
 /* =========================================
-   NAČTENÍ
+   PŘIDÁNÍ ITEMU
 ========================================= */
 
-function loadInventory() {
+function addItem(
+    id,
+    name,
+    description = "",
+    icon = "📦"
+) {
 
-    const saved =
-        localStorage.getItem(
-            "BLACKOUT_INVENTORY"
+    if (
+        inventory.some(
+            item => item.id === id
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    inventory.push({
+
+        id: id,
+
+        name: name,
+
+        description:
+            description,
+
+        icon: icon,
+
+        used: false
+
+    });
+
+
+    saveInventory();
+
+    updateInventoryUI();
+
+    return true;
+
+}
+
+
+/* =========================================
+   ODSTRANĚNÍ ITEMU
+========================================= */
+
+function removeItem(id) {
+
+    inventory =
+        inventory.filter(
+            item => item.id !== id
         );
 
-    if (!saved) {
+
+    saveInventory();
+
+    selectedItem = null;
+
+    updateInventoryUI();
+
+}
+
+
+/* =========================================
+   NALEZENÍ ITEMU
+========================================= */
+
+function getItem(id) {
+
+    return inventory.find(
+        item => item.id === id
+    );
+
+}
+
+
+/* =========================================
+   MÁ HRÁČ ITEM?
+========================================= */
+
+function hasItem(id) {
+
+    return inventory.some(
+        item => item.id === id
+    );
+
+}
+
+
+/* =========================================
+   POČET ITEMŮ
+========================================= */
+
+function inventoryCount() {
+
+    return inventory.length;
+
+}
+
+
+/* =========================================
+   OTEVŘENÍ INVENTÁŘE
+========================================= */
+
+function openInventory() {
+
+    const modal =
+        document.getElementById(
+            "inventoryModal"
+        );
+
+    if (!modal) {
         return;
     }
 
-    try {
 
-        const data =
-            JSON.parse(saved);
+    renderInventory();
 
-        if (Array.isArray(data)) {
-            inventory = data;
-        }
+    modal.style.display = "flex";
 
-    } catch (error) {
+    modal.classList.add("show");
 
-        inventory = [];
 
+    playSound("click");
+
+}
+
+
+/* =========================================
+   ZAVŘENÍ
+========================================= */
+
+function closeInventory() {
+
+    const modal =
+        document.getElementById(
+            "inventoryModal"
+        );
+
+    if (!modal) {
+        return;
     }
+
+
+    modal.classList.remove("show");
+
+    modal.style.display = "none";
+
+    selectedItem = null;
 
 }
 
@@ -154,64 +232,132 @@ function renderInventory() {
     if (inventory.length === 0) {
 
         box.innerHTML = `
-            <div class="gray">
-                Inventář je prázdný.
+
+            <div class="empty-inventory">
+
+                🎒
+
+                <h3>
+                    Inventář je prázdný
+                </h3>
+
+                <p>
+                    Prozkoumávej místnosti
+                    a hledej užitečné předměty.
+                </p>
+
             </div>
+
         `;
 
         return;
+
     }
 
 
-    box.innerHTML = `
-        <div class="inventory-items"></div>
+    let html = `
+
+        <div class="inventory-grid">
+
     `;
 
 
-    const itemsBox =
-        box.querySelector(
-            ".inventory-items"
-        );
+    inventory.forEach(
+        item => {
+
+            const used =
+                item.used === true;
 
 
-    inventory.forEach(item => {
+            html += `
 
-        const element =
-            document.createElement("button");
+                <button
+                    class="
+                        inventory-item
+                        ${used ? "used" : ""}
+                    "
+                    onclick="
+                        selectInventoryItem(
+                            '${item.id}'
+                        )
+                    ">
 
-        element.className =
-            "inventory-item";
+                    <span class="item-icon">
 
-        element.textContent =
-            "🎒 " + item;
+                        ${item.icon}
 
-        element.onclick = () => {
+                    </span>
 
-            selectItem(item);
+                    <strong>
 
-        };
+                        ${item.name}
 
-        itemsBox.appendChild(element);
+                    </strong>
 
-    });
+                    ${
+                        used
+
+                        ? `
+                            <small>
+                                POUŽITO
+                            </small>
+                          `
+
+                        : ""
+
+                    }
+
+                </button>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+        </div>
+
+        <div id="selectedItem">
+
+            <p>
+                Vyber předmět.
+            </p>
+
+        </div>
+
+    `;
+
+
+    box.innerHTML = html;
 
 }
 
 
 /* =========================================
-   VYBRÁNÍ PŘEDMĚTU
+   VÝBĚR ITEMU
 ========================================= */
 
-function selectItem(item) {
+function selectInventoryItem(id) {
 
-    selectedItem = item;
+    const item =
+        getItem(id);
 
-    playSound("click");
+
+    if (!item) {
+        return;
+    }
+
+
+    selectedItem = id;
+
 
     const box =
         document.getElementById(
-            "inventoryContent"
+            "selectedItem"
         );
+
 
     if (!box) {
         return;
@@ -220,84 +366,369 @@ function selectItem(item) {
 
     box.innerHTML = `
 
-        <div class="output show">
+        <div class="selected-item">
 
-            <h3 class="green">
-                🎒 ${item}
+            <div class="selected-icon">
+
+                ${item.icon}
+
+            </div>
+
+            <h3>
+                ${item.name}
             </h3>
 
             <p>
-                Předmět je vybraný.
+                ${item.description}
             </p>
 
-            <button
-                class="main-button"
-                onclick="clearSelectedItem(); renderInventory()">
 
-                ZRUŠIT VÝBĚR
+            <div class="item-actions">
 
-            </button>
+                <button
+                    class="main-button"
+                    onclick="
+                        examineItem(
+                            '${item.id}'
+                        )
+                    ">
+
+                    🔎 PROZKOUMAT
+
+                </button>
+
+
+                <button
+                    class="secondary-button"
+                    onclick="
+                        useSelectedItem()
+                    ">
+
+                    🖐️ POUŽÍT
+
+                </button>
+
+            </div>
 
         </div>
 
-        <br>
-
-        <div class="inventory-items"></div>
     `;
 
 
-    const itemsBox =
-        box.querySelector(
-            ".inventory-items"
-        );
-
-
-    inventory.forEach(otherItem => {
-
-        const element =
-            document.createElement("button");
-
-        element.className =
-            "inventory-item";
-
-        element.textContent =
-            "🎒 " + otherItem;
-
-        element.onclick = () => {
-
-            selectItem(otherItem);
-
-        };
-
-        itemsBox.appendChild(element);
-
-    });
+    playSound("click");
 
 }
 
 
 /* =========================================
-   POUŽITÍ PŘEDMĚTU
+   PROZKOUMAT ITEM
 ========================================= */
 
-function useItem(item, target) {
+function examineItem(id) {
 
-    if (!hasItem(item)) {
-        return false;
+    const item =
+        getItem(id);
+
+
+    if (!item) {
+        return;
     }
 
 
-    if (
-        typeof handleItemUse === "function"
-    ) {
+    let message =
+        item.description;
 
-        return handleItemUse(
-            item,
-            target
+
+    /*
+       Speciální informace
+       některých předmětů.
+    */
+
+    if (id === "oldID") {
+
+        message =
+            "Na zadní straně průkazu je vyraženo: " +
+            "4729. Pod číslem je malé logo SECTOR 07.";
+
+        setFlag(
+            "examined_oldID",
+            true
         );
 
     }
 
+
+    if (id === "incidentReport") {
+
+        message =
+            "Dokument potvrzuje, že INCIDENT 07 " +
+            "nebyla technická závada. " +
+            "Událost byla záměrně utajena.";
+
+        setFlag(
+            "read_incident",
+            true
+        );
+
+    }
+
+
+    showInventoryMessage(
+        message,
+        "info"
+    );
+
+
+    playSound("click");
+
+}
+
+
+/* =========================================
+   POUŽITÍ ITEMU
+========================================= */
+
+function useSelectedItem() {
+
+    if (!selectedItem) {
+
+        showInventoryMessage(
+            "Nejdřív vyber předmět.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const item =
+        getItem(selectedItem);
+
+
+    if (!item) {
+        return;
+    }
+
+
+    const used =
+        useItem(
+            item.id
+        );
+
+
+    if (!used) {
+
+        showInventoryMessage(
+
+            "Tento předmět se tady " +
+            "nedá použít.",
+
+            "error"
+
+        );
+
+        playSound("error");
+
+    }
+
+}
+
+
+/* =========================================
+   LOGIKA POUŽITÍ
+========================================= */
+
+function useItem(id) {
+
+    /*
+       STARÝ PRŮKAZ
+    */
+
+    if (id === "oldID") {
+
+        if (
+            currentRoom ===
+            "room1"
+        ) {
+
+            showInventoryMessage(
+
+                "Průkaz se hodí k terminálu. " +
+                "Zkus ho nejdřív prozkoumat.",
+
+                "info"
+
+            );
+
+            return true;
+
+        }
+
+
+        if (
+            currentRoom ===
+            "room3"
+        ) {
+
+            showInventoryMessage(
+
+                "Bezpečnostní systém " +
+                "průkaz rozpoznal.",
+
+                "success"
+
+            );
+
+
+            setFlag(
+                "securityCardAccepted",
+                true
+            );
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /*
+       POJISTKA
+    */
+
+    if (id === "fuse") {
+
+        if (
+            currentRoom ===
+            "room2"
+        ) {
+
+            showInventoryMessage(
+
+                "Pojistka patří do rozvaděče.",
+
+                "info"
+
+            );
+
+
+            setFlag(
+                "fuseReady",
+                true
+            );
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /*
+       AKTIVÁTOR
+    */
+
+    if (id === "chemical") {
+
+        if (
+            currentRoom ===
+            "room4"
+        ) {
+
+            showInventoryMessage(
+
+                "Aktivátor reaguje s laboratorním zařízením.",
+
+                "success"
+
+            );
+
+
+            setFlag(
+                "chemicalUsed",
+                true
+            );
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /*
+       INCIDENT 07
+    */
+
+    if (
+        id ===
+        "incidentReport"
+    ) {
+
+        examineItem(
+            id
+        );
+
+        return true;
+
+    }
+
+
+    /*
+       PŘÍSTUPOVÝ TOKEN
+    */
+
+    if (
+        id ===
+        "accessToken"
+    ) {
+
+        if (
+            currentRoom ===
+            "room6"
+        ) {
+
+            showInventoryMessage(
+
+                "Token je kompatibilní s ROOT systémem.",
+
+                "success"
+
+            );
+
+
+            setFlag(
+                "tokenReady",
+                true
+            );
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /*
+       NEZNÁMÝ ITEM
+    */
 
     return false;
 
@@ -305,44 +736,89 @@ function useItem(item, target) {
 
 
 /* =========================================
-   POUŽITÍ VYBRANÉHO PŘEDMĚTU
+   ZPRÁVA
 ========================================= */
 
-function useSelectedItem(target) {
+function showInventoryMessage(
+    message,
+    type = "info"
+) {
 
-    if (!selectedItem) {
-        return false;
-    }
-
-
-    const result =
-        useItem(
-            selectedItem,
-            target
+    const box =
+        document.getElementById(
+            "selectedItem"
         );
 
 
-    if (result) {
+    if (!box) {
 
-        selectedItem = null;
+        alert(message);
 
-        closeInventory();
+        return;
 
     }
 
 
-    return result;
+    box.innerHTML += `
+
+        <div
+            class="
+                inventory-message
+                ${type}
+            ">
+
+            ${message}
+
+        </div>
+
+    `;
 
 }
 
 
 /* =========================================
-   ZRUŠENÍ VÝBĚRU
+   OZNAČENÍ ITEMU JAKO POUŽITÉHO
 ========================================= */
 
-function clearSelectedItem() {
+function markItemUsed(id) {
 
-    selectedItem = null;
+    const item =
+        getItem(id);
+
+
+    if (!item) {
+        return;
+    }
+
+
+    item.used = true;
+
+
+    saveInventory();
+
+    renderInventory();
+
+}
+
+
+/* =========================================
+   UI
+========================================= */
+
+function updateInventoryUI() {
+
+    const counter =
+        document.getElementById(
+            "inventoryCounter"
+        );
+
+
+    if (counter) {
+
+        counter.textContent =
+            inventory.length;
+
+    }
 
 }
 
@@ -353,11 +829,11 @@ function clearSelectedItem() {
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function() {
 
         loadInventory();
 
-        renderInventory();
+        updateInventoryUI();
 
     }
 );
