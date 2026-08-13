@@ -198,13 +198,145 @@ Find a way out.
 
 function startGame(){
 
- alert(
- "FACILITY ACCESS STARTED\n\n" +
- "The first security door is locked."
- );
+ document.querySelector(".logo").innerHTML = `
+   <h1>SECURITY</h1>
+   <p>ROOM // 01</p>
+ `;
+
+ document.querySelector(".terminal").innerHTML = `
+
+ <div style="color:#ff4242">
+ ⚠ SECURITY DOOR LOCKED ⚠
+ </div>
+
+ <br>
+
+ <div>
+ SECURITY TERMINAL
+ </div>
+
+ <br>
+
+ <div>
+ Four digit access code required.
+ </div>
+
+ <br>
+
+ <div style="color:#fff36b">
+ A note has been found beside
+ the terminal.
+ </div>
+
+ <br>
+
+ <div>
+ "7 cameras.<br>
+  3 generators.<br>
+  9 doors.<br>
+  1 control room."
+ </div>
+
+ <br>
+
+ <div>
+ "The numbers are not random."
+ </div>
+
+ `;
+
+ document.querySelector("button").outerHTML = `
+
+ <input
+ id="code"
+ inputmode="numeric"
+ maxlength="4"
+ placeholder="ENTER 4-DIGIT CODE"
+ style="
+ display:block;
+ width:100%;
+ max-width:300px;
+ margin:25px auto;
+ padding:15px;
+ background:#010501;
+ border:1px solid #39ff55;
+ color:#65ff73;
+ font-family:monospace;
+ font-size:18px;
+ text-align:center;
+ "
+ >
+
+ <button onclick="checkCode()">
+ [ UNLOCK ]
+ </button>
+
+ `;
 
 }
 
+ function checkCode(){
+
+ const code =
+ document.getElementById("code").value;
+
+ if(code === "7391"){
+
+   document.querySelector(".terminal").innerHTML += `
+
+   <br>
+
+   <div style="
+   color:#39ff55;
+   font-size:20px;
+   text-shadow:0 0 15px #00ff33;
+   ">
+
+   ✓ ACCESS GRANTED
+
+   </div>
+
+   <br>
+
+   SECURITY DOOR UNLOCKED.
+
+   `;
+
+   document.querySelector("button").outerHTML = `
+   
+   <button onclick="nextRoom()">
+   [ ENTER ROOM 02 ]
+   </button>
+
+   `;
+
+ }else{
+
+   document.querySelector(".terminal").innerHTML += `
+
+   <br>
+
+   <div style="color:#ff4242">
+   ❌ ACCESS DENIED
+   </div>
+
+   `;
+
+   document.getElementById("code").value = "";
+
+ }
+
+}
+
+
+function nextRoom(){
+
+ alert(
+ "ROOM 02\n\n" +
+ "ARCHIVE ACCESS REQUIRED."
+ );
+
+}
 </script>
 
 </body>
