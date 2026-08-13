@@ -2,11 +2,6 @@
    BLACKOUT — MÍSTNOSTI
 ========================================= */
 
-
-/* =========================================
-   VYKRESLENÍ MÍSTNOSTI
-========================================= */
-
 function renderRoom(roomId) {
 
     const box =
@@ -55,24 +50,45 @@ function renderRoom(roomId) {
 
             box.innerHTML = `
                 <h2>CHYBA</h2>
-                <p>
-                    Tato místnost neexistuje.
-                </p>
+                <p>Tato místnost neexistuje.</p>
             `;
 
     }
 
-
     rememberRoom(roomId);
-
 }
 
 
 /* =========================================
-   ROOM 1 — PROBUZENÍ
+   POMOCNÁ FUNKCE PRO PŘEDMĚT
+========================================= */
+
+function takeItem(item) {
+
+    if (hasItem(item)) {
+        return false;
+    }
+
+    addItem(item);
+
+    showRoom(currentRoom);
+
+    return true;
+}
+
+
+/* =========================================
+   ROOM 1
 ========================================= */
 
 function renderRoom1(box) {
+
+    const badgeTaken =
+        hasItem("STARÝ PRŮKAZ");
+
+    const keyTaken =
+        hasItem("MALÝ KLÍČ");
+
 
     box.innerHTML = `
 
@@ -84,17 +100,11 @@ function renderRoom1(box) {
             SECTOR 01
         </div>
 
-
         <div class="room-scene">
-
             🛏️
-
             <br>
-
             MALÁ OBSERVAČNÍ MÍSTNOST
-
         </div>
-
 
         <div class="room-description">
 
@@ -117,47 +127,35 @@ function renderRoom1(box) {
 
         </div>
 
-
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    inspectBed()
-                ">
+                onclick="inspectBed()">
 
                 🛏️ Prohlédnout postel
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    inspectDesk()
-                ">
+                onclick="inspectDesk()">
 
                 🗄️ Prohlédnout stůl
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    inspectDoor()
-                ">
+                onclick="inspectDoor()">
 
                 🚪 Prohlédnout dveře
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    searchRoom1()
-                ">
+                onclick="searchRoom1()">
 
                 🔎 Prohledat místnost
 
@@ -165,14 +163,9 @@ function renderRoom1(box) {
 
         </div>
 
-
-        <div
-            id="room1Output"
-            class="output">
-        </div>
+        <div id="room1Output" class="output"></div>
 
     `;
-
 }
 
 
@@ -187,10 +180,25 @@ function inspectBed() {
             "room1Output"
         );
 
+    output.classList.add("show");
 
-    output.classList.add(
-        "show"
-    );
+
+    if (hasItem("STARÝ PRŮKAZ")) {
+
+        output.innerHTML = `
+
+            Pod matrací už nic dalšího není.
+
+            <br><br>
+
+            <span class="green">
+                ✓ STARÝ PRŮKAZ JSI UŽ VZAL
+            </span>
+
+        `;
+
+        return;
+    }
 
 
     output.innerHTML = `
@@ -211,16 +219,13 @@ function inspectBed() {
 
         <button
             class="main-button"
-            onclick="
-                addItem('STARÝ PRŮKAZ')
-            ">
+            onclick="takeItem('STARÝ PRŮKAZ')">
 
             VZÍT
 
         </button>
 
     `;
-
 }
 
 
@@ -235,10 +240,25 @@ function inspectDesk() {
             "room1Output"
         );
 
+    output.classList.add("show");
 
-    output.classList.add(
-        "show"
-    );
+
+    if (hasItem("MALÝ KLÍČ")) {
+
+        output.innerHTML = `
+
+            Na stole už nic dalšího není.
+
+            <br><br>
+
+            <span class="green">
+                ✓ MALÝ KLÍČ JSI UŽ VZAL
+            </span>
+
+        `;
+
+        return;
+    }
 
 
     output.innerHTML = `
@@ -253,8 +273,8 @@ function inspectDesk() {
 
         <span class="yellow">
 
-        „Když zhasnou světla,
-        hledej červenou značku.“
+            „Když zhasnou světla,
+            hledej červenou značku.“
 
         </span>
 
@@ -273,16 +293,13 @@ function inspectDesk() {
 
         <button
             class="main-button"
-            onclick="
-                addItem('MALÝ KLÍČ')
-            ">
+            onclick="takeItem('MALÝ KLÍČ')">
 
             VZÍT KLÍČ
 
         </button>
 
     `;
-
 }
 
 
@@ -297,65 +314,30 @@ function inspectDoor() {
             "room1Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
+    output.classList.add("show");
 
 
-    if (
-        hasItem("STARÝ PRŮKAZ")
-    ) {
+    output.innerHTML = `
 
-        output.innerHTML = `
+        Dveře jsou zamčené.
 
-            Elektronická čtečka
-            bliká červeně.
+        <br><br>
 
-            <br><br>
+        Vedle nich je
+        elektronická čtečka.
 
-            Potřebuje přístupový
-            čip.
+        <br><br>
 
-            <br><br>
+        <span class="red">
+            PŘÍSTUP ODEPŘEN
+        </span>
 
-            Starý průkaz se do ní
-            nevejde.
-
-            <br><br>
-
-            <span class="gray">
-                Potřebuješ něco jiného.
-            </span>
-
-        `;
-
-    } else {
-
-        output.innerHTML = `
-
-            Dveře jsou zamčené.
-
-            <br><br>
-
-            Vedle nich je
-            elektronická čtečka.
-
-            <br><br>
-
-            <span class="red">
-                PŘÍSTUP ODEPŘEN
-            </span>
-
-        `;
-
-    }
-
+    `;
 }
 
 
 /* =========================================
-   PROHLEDÁNÍ MÍSTNOSTI
+   PROHLEDÁNÍ
 ========================================= */
 
 function searchRoom1() {
@@ -365,10 +347,7 @@ function searchRoom1() {
             "room1Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
+    output.classList.add("show");
 
 
     output.innerHTML = `
@@ -377,28 +356,24 @@ function searchRoom1() {
 
         <br><br>
 
-        Nic dalšího jsi nenašel.
+        Všiml sis malé
 
-        <br><br>
-
-        Ale všiml sis,
-        že na stěně je malá
         <span class="red">
-            červená značka.
+            červené značky
         </span>
 
+        na stěně.
+
         <br><br>
 
-        Možná bude později
-        důležitá.
+        Možná bude později důležitá.
 
     `;
-
 }
 
 
 /* =========================================
-   ROOM 2 — TECHNICKÁ MÍSTNOST
+   ROOM 2
 ========================================= */
 
 function renderRoom2(box) {
@@ -413,17 +388,11 @@ function renderRoom2(box) {
             SECTOR 02
         </div>
 
-
         <div class="room-scene">
-
             🔌
-
             <br>
-
             ELEKTRICKÝ PANEL
-
         </div>
-
 
         <div class="room-description">
 
@@ -432,66 +401,44 @@ function renderRoom2(box) {
 
             <br><br>
 
-            Většina systémů je mrtvá.
-
-            <br><br>
-
-            Na zdi je velký panel
+            Na zdi je panel
             s odpojenými kabely.
 
         </div>
-
 
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    openCablePuzzle()
-                ">
+                onclick="openCablePuzzle()">
 
                 🔌 Zapojit kabely
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    searchTechnicalRoom()
-                ">
+                onclick="searchTechnicalRoom()">
 
                 🔎 Prohledat místnost
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    openInventory()
-                ">
+                onclick="openInventory()">
 
-                🎒 Použít předmět
+                🎒 Inventář
 
             </button>
 
         </div>
 
-
-        <div
-            id="room2Output"
-            class="output">
-        </div>
+        <div id="room2Output" class="output"></div>
 
     `;
-
 }
 
-
-/* =========================================
-   TECHNICKÁ MÍSTNOST
-========================================= */
 
 function searchTechnicalRoom() {
 
@@ -500,66 +447,30 @@ function searchTechnicalRoom() {
             "room2Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
+    output.classList.add("show");
 
 
-    if (
-        !hasItem("ŠROUBOVÁK")
-    ) {
+    output.innerHTML = `
 
-        output.innerHTML = `
+        Za panelem něco je.
 
-            Za panelem něco je.
+        <br><br>
 
-            <br><br>
+        Potřeboval bys nástroj,
+        kterým bys mohl panel otevřít.
 
-            Potřeboval bys nástroj,
-            kterým bys mohl panel
-            otevřít.
+        <br><br>
 
-            <br><br>
+        <span class="yellow">
+            Možná šroubovák...
+        </span>
 
-            <span class="yellow">
-                Možná šroubovák...
-            </span>
-
-        `;
-
-    } else {
-
-        output.innerHTML = `
-
-            Pomocí šroubováku
-            otevřeš kryt panelu.
-
-            <br><br>
-
-            Uvnitř je starý dokument.
-
-            <br><br>
-
-            <span class="green">
-                📄 TECHNICKÝ PLÁN
-            </span>
-
-            <br><br>
-
-            V dokumentu je
-            zakresleno několik
-            kabelových spojení.
-
-        `;
-
-    }
-
+    `;
 }
 
 
 /* =========================================
-   ROOM 3 — CHODBA
+   ROOM 3
 ========================================= */
 
 function renderRoom3(box) {
@@ -574,15 +485,9 @@ function renderRoom3(box) {
             SECTOR 03
         </div>
 
-
         <div class="room-scene">
-
-            🚪
-            🚨
-            🚪
-
+            🚪 🚨 🚪
         </div>
-
 
         <div class="room-description">
 
@@ -593,38 +498,21 @@ function renderRoom3(box) {
             Některé bezpečnostní
             kamery stále fungují.
 
-            <br><br>
-
-            Na konci chodby jsou
-            dveře označené:
-
-            <br><br>
-
-            <span class="red">
-                AUTHORIZED PERSONNEL ONLY
-            </span>
-
         </div>
-
 
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    inspectSecurityDoor()
-                ">
+                onclick="inspectSecurityDoor()">
 
                 🚪 Prohlédnout dveře
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    inspectCamera()
-                ">
+                onclick="inspectCamera()">
 
                 📹 Prohlédnout kameru
 
@@ -632,20 +520,11 @@ function renderRoom3(box) {
 
         </div>
 
-
-        <div
-            id="room3Output"
-            class="output">
-        </div>
+        <div id="room3Output" class="output"></div>
 
     `;
-
 }
 
-
-/* =========================================
-   BEZPEČNOSTNÍ DVEŘE
-========================================= */
 
 function inspectSecurityDoor() {
 
@@ -654,15 +533,10 @@ function inspectSecurityDoor() {
             "room3Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
+    output.classList.add("show");
 
 
-    if (
-        hasItem("PŘÍSTUPOVÝ ČIP")
-    ) {
+    if (hasItem("PŘÍSTUPOVÝ ČIP")) {
 
         output.innerHTML = `
 
@@ -676,16 +550,11 @@ function inspectSecurityDoor() {
 
             <br><br>
 
-            Dveře vedou
-            do laboratoře.
-
-            <br><br>
-
             <button
                 class="main-button"
                 onclick="
                     unlockRoom('room4');
-                    showRoom('room4')
+                    showRoom('room4');
                 ">
 
                 OTEVŘÍT DVEŘE
@@ -704,19 +573,13 @@ function inspectSecurityDoor() {
 
             <br><br>
 
-            Potřebuješ
-            přístupový čip.
+            Potřebuješ přístupový čip.
 
         `;
 
     }
-
 }
 
-
-/* =========================================
-   KAMERA
-========================================= */
 
 function inspectCamera() {
 
@@ -725,11 +588,7 @@ function inspectCamera() {
             "room3Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
-
+    output.classList.add("show");
 
     output.innerHTML = `
 
@@ -737,8 +596,7 @@ function inspectCamera() {
 
         <br><br>
 
-        Na jejím krytu je
-        vyrytý symbol:
+        Na jejím krytu je vyrytý symbol:
 
         <br><br>
 
@@ -746,18 +604,12 @@ function inspectCamera() {
             △ 07 △
         </span>
 
-        <br><br>
-
-        Možná budeš tento symbol
-        potřebovat později.
-
     `;
-
 }
 
 
 /* =========================================
-   ROOM 4 — LABORATOŘ
+   ROOM 4
 ========================================= */
 
 function renderRoom4(box) {
@@ -772,15 +624,9 @@ function renderRoom4(box) {
             SECTOR 04
         </div>
 
-
         <div class="room-scene">
-
-            🧪
-            💻
-            🧬
-
+            🧪 💻 🧬
         </div>
-
 
         <div class="room-description">
 
@@ -789,46 +635,32 @@ function renderRoom4(box) {
 
             <br><br>
 
-            Uprostřed místnosti
-            stojí počítač.
-
-            <br><br>
-
-            Na stole je také
-            malá UV svítilna.
+            Uprostřed místnosti stojí
+            počítač.
 
         </div>
-
 
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    takeUV()
-                ">
+                onclick="takeUV()">
 
                 🔦 Vzít UV svítilnu
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    inspectComputer()
-                ">
+                onclick="inspectComputer()">
 
                 💻 Prohlédnout počítač
 
             </button>
 
-
             <button
                 class="action-button"
-                onclick="
-                    searchLab()
-                ">
+                onclick="searchLab()">
 
                 🔎 Prohledat laboratoř
 
@@ -836,47 +668,36 @@ function renderRoom4(box) {
 
         </div>
 
-
-        <div
-            id="room4Output"
-            class="output">
-        </div>
+        <div id="room4Output" class="output"></div>
 
     `;
-
 }
 
 
-/* =========================================
-   UV SVÍTILNA
-========================================= */
-
 function takeUV() {
-
-    if (
-        hasItem("UV SVÍTILNA")
-    ) {
-
-        return;
-
-    }
-
-
-    addItem(
-        "UV SVÍTILNA"
-    );
-
 
     const output =
         document.getElementById(
             "room4Output"
         );
 
+    if (hasItem("UV SVÍTILNA")) {
 
-    output.classList.add(
-        "show"
-    );
+        output.classList.add("show");
 
+        output.innerHTML = `
+            <span class="green">
+                ✓ UV SVÍTILNU JSI UŽ VZAL
+            </span>
+        `;
+
+        return;
+    }
+
+
+    takeItem("UV SVÍTILNA");
+
+    output.classList.add("show");
 
     output.innerHTML = `
 
@@ -885,17 +706,11 @@ function takeUV() {
         <br><br>
 
         Možná odhalí něco,
-        co normální světlo
-        neukáže.
+        co normální světlo neukáže.
 
     `;
-
 }
 
-
-/* =========================================
-   POČÍTAČ
-========================================= */
 
 function inspectComputer() {
 
@@ -904,26 +719,12 @@ function inspectComputer() {
             "room4Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
-
+    output.classList.add("show");
 
     output.innerHTML = `
 
         Počítač vyžaduje
         přístupový kód.
-
-        <br><br>
-
-        Na obrazovce je pouze:
-
-        <br><br>
-
-        <span class="green">
-            ENTER ACCESS CODE
-        </span>
 
         <br><br>
 
@@ -942,13 +743,8 @@ function inspectComputer() {
         </button>
 
     `;
-
 }
 
-
-/* =========================================
-   PROHLEDÁNÍ LABORATOŘE
-========================================= */
 
 function searchLab() {
 
@@ -957,15 +753,10 @@ function searchLab() {
             "room4Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
+    output.classList.add("show");
 
 
-    if (
-        hasItem("UV SVÍTILNA")
-    ) {
+    if (hasItem("UV SVÍTILNA")) {
 
         output.innerHTML = `
 
@@ -982,11 +773,6 @@ function searchLab() {
                 04 — 27
             </span>
 
-            <br><br>
-
-            To může být kód
-            k počítači.
-
         `;
 
     } else {
@@ -997,18 +783,19 @@ function searchLab() {
 
             <br><br>
 
-            Na stěně jsou jen
-            staré skvrny.
+            <span class="gray">
+                Možná potřebuješ
+                speciální světlo.
+            </span>
 
         `;
 
     }
-
 }
 
 
 /* =========================================
-   ROOM 5 — ARCHIV
+   ROOM 5
 ========================================= */
 
 function renderRoom5(box) {
@@ -1023,36 +810,22 @@ function renderRoom5(box) {
             SECTOR 05
         </div>
 
-
         <div class="room-scene">
-
-            📁
-            🗄️
-            📄
-
+            📁 🗄️ 📄
         </div>
-
 
         <div class="room-description">
 
             Police jsou plné
             dokumentů.
 
-            <br><br>
-
-            Některé spisy jsou
-            označené červenou barvou.
-
         </div>
-
 
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    searchArchive()
-                ">
+                onclick="searchArchive()">
 
                 📁 Hledat dokumenty
 
@@ -1060,14 +833,9 @@ function renderRoom5(box) {
 
         </div>
 
-
-        <div
-            id="room5Output"
-            class="output">
-        </div>
+        <div id="room5Output" class="output"></div>
 
     `;
-
 }
 
 
@@ -1078,11 +846,7 @@ function searchArchive() {
             "room5Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
-
+    output.classList.add("show");
 
     output.innerHTML = `
 
@@ -1096,16 +860,13 @@ function searchArchive() {
 
         <br><br>
 
-        Dokument uvádí,
-        že v roce 2009
-        nedošlo k technické
-        závadě.
+        V roce 2009 nedošlo
+        k obyčejné technické závadě.
 
         <br><br>
 
         Celé zařízení bylo
-        uzavřeno kvůli
-        experimentu.
+        uzavřeno kvůli experimentu.
 
         <br><br>
 
@@ -1115,12 +876,11 @@ function searchArchive() {
         </span>
 
     `;
-
 }
 
 
 /* =========================================
-   ROOM 6 — KONTROLNÍ CENTRUM
+   ROOM 6
 ========================================= */
 
 function renderRoom6(box) {
@@ -1135,36 +895,22 @@ function renderRoom6(box) {
             SECTOR 06
         </div>
 
-
         <div class="room-scene">
-
-            💻
-            📡
-            🚨
-
+            💻 📡 🚨
         </div>
-
 
         <div class="room-description">
 
             Obrovská obrazovka
             pokrývá celou stěnu.
 
-            <br><br>
-
-            Některé systémy jsou
-            stále aktivní.
-
         </div>
-
 
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    inspectControl()
-                ">
+                onclick="inspectControl()">
 
                 💻 Aktivovat terminál
 
@@ -1172,14 +918,9 @@ function renderRoom6(box) {
 
         </div>
 
-
-        <div
-            id="room6Output"
-            class="output">
-        </div>
+        <div id="room6Output" class="output"></div>
 
     `;
-
 }
 
 
@@ -1190,11 +931,7 @@ function inspectControl() {
             "room6Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
-
+    output.classList.add("show");
 
     output.innerHTML = `
 
@@ -1202,36 +939,22 @@ function inspectControl() {
 
         <br><br>
 
-        Na obrazovce se objeví:
-
-        <br><br>
-
         <span class="red">
-
-            SUBJECT STATUS:
-            UNKNOWN
-
+            SUBJECT STATUS: UNKNOWN
         </span>
-
-        <br><br>
-
-        Potom systém zobrazí:
 
         <br><br>
 
         <span class="yellow">
-
             „NĚKDO JE STÁLE UVNITŘ.“
-
         </span>
 
     `;
-
 }
 
 
 /* =========================================
-   ROOM 7 — TUNEL
+   ROOM 7
 ========================================= */
 
 function renderRoom7(box) {
@@ -1246,36 +969,22 @@ function renderRoom7(box) {
             SECTOR 07
         </div>
 
-
         <div class="room-scene">
-
-            🚇
-            💡
-            🌑
-
+            🚇 💡 🌑
         </div>
-
 
         <div class="room-description">
 
             Úzký tunel vede hluboko
             pod zařízením.
 
-            <br><br>
-
-            Na konci vidíš slabé
-            světlo.
-
         </div>
-
 
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    exploreTunnel()
-                ">
+                onclick="exploreTunnel()">
 
                 🚶 Jít dál
 
@@ -1283,14 +992,9 @@ function renderRoom7(box) {
 
         </div>
 
-
-        <div
-            id="room7Output"
-            class="output">
-        </div>
+        <div id="room7Output" class="output"></div>
 
     `;
-
 }
 
 
@@ -1301,11 +1005,7 @@ function exploreTunnel() {
             "room7Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
-
+    output.classList.add("show");
 
     output.innerHTML = `
 
@@ -1313,12 +1013,7 @@ function exploreTunnel() {
 
         <br><br>
 
-        Po několika metrech
-        najdeš kovové dveře.
-
-        <br><br>
-
-        Nad nimi je nápis:
+        Na konci vidíš kovové dveře.
 
         <br><br>
 
@@ -1326,18 +1021,12 @@ function exploreTunnel() {
             EMERGENCY EXIT
         </span>
 
-        <br><br>
-
-        Možná jsi konečně
-        našel cestu ven.
-
     `;
-
 }
 
 
 /* =========================================
-   ROOM 8 — VÝSTUP
+   ROOM 8
 ========================================= */
 
 function renderRoom8(box) {
@@ -1352,42 +1041,25 @@ function renderRoom8(box) {
             EMERGENCY EXIT
         </div>
 
-
         <div class="room-scene">
-
-            🚨
-            🚪
-            🌌
-
+            🚨 🚪 🌌
         </div>
-
 
         <div class="room-description">
 
-            Stojíš před posledními
-            dveřmi.
+            Stojíš před posledními dveřmi.
 
             <br><br>
 
-            Za nimi je venkovní
-            prostor.
-
-            <br><br>
-
-            Ale dveře stále
-            potřebují poslední
-            autorizaci.
+            Za nimi je venkovní prostor.
 
         </div>
-
 
         <div class="actions">
 
             <button
                 class="action-button"
-                onclick="
-                    finalDoor()
-                ">
+                onclick="finalDoor()">
 
                 🚪 Otevřít dveře
 
@@ -1395,20 +1067,11 @@ function renderRoom8(box) {
 
         </div>
 
-
-        <div
-            id="room8Output"
-            class="output">
-        </div>
+        <div id="room8Output" class="output"></div>
 
     `;
-
 }
 
-
-/* =========================================
-   FINÁLNÍ DVEŘE
-========================================= */
 
 function finalDoor() {
 
@@ -1417,74 +1080,30 @@ function finalDoor() {
             "room8Output"
         );
 
-
-    output.classList.add(
-        "show"
-    );
-
+    output.classList.add("show");
 
     output.innerHTML = `
 
         <span class="green">
-
             AUTORIZACE POTVRZENA
-
         </span>
 
         <br><br>
 
-        Dveře se pomalu otevřou.
-
-        <br><br>
-
-        Do místnosti pronikne
-        studený noční vzduch.
+        Dveře se otevřely.
 
         <br><br>
 
         <span class="yellow">
-
             DOKÁZAL JSI UTÉCT.
-
         </span>
 
     `;
 
+    completeRoom("room8");
 
-    completeRoom(
-        "room8"
-    );
-
-    playSound(
-        "success"
-    );
+    playSound("success");
 
     flashScreen();
-
-}
-
-
-/* =========================================
-   ZÁKLADNÍ INTERAKCE
-========================================= */
-
-function showMessage(
-    elementId,
-    message
-) {
-
-    const element =
-        document.getElementById(
-            elementId
-        );
-
-    if (!element) return;
-
-    element.classList.add(
-        "show"
-    );
-
-    element.innerHTML =
-        message;
 
 }
