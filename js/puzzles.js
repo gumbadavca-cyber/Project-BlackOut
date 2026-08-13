@@ -1,12 +1,13 @@
-/* =========================================
-   BLACKOUT — PUZZLES / MINIHRY
-   Verze kompatibilní s rooms.js
-========================================= */
+/* =====================================================
+   BLACKOUT — PUZZLES
+   STORY VERSION
+   Kompatibilní s rooms.js
+===================================================== */
 
 
-/* =========================================
+/* =====================================================
    POMOCNÉ FUNKCE
-========================================= */
+===================================================== */
 
 function puzzleDone(id) {
     if (typeof getFlag !== "function") return false;
@@ -32,69 +33,382 @@ function finishPuzzle(id) {
         flashScreen();
     }
 
-    if (typeof unlockNextRoom === "function") {
-        unlockNextRoom();
-    }
-
-    if (typeof renderRoom === "function" &&
-        typeof currentRoom !== "undefined") {
-
-        setTimeout(() => {
-            renderRoom(currentRoom);
-        }, 50);
-    }
-
     if (typeof updateMap === "function") {
         updateMap();
     }
 }
 
 
-/* =========================================
-   1 — TERMINÁL
-========================================= */
+function refreshRoom() {
+
+    if (
+        typeof renderRoom === "function" &&
+        typeof currentRoom !== "undefined"
+    ) {
+        renderRoom(currentRoom);
+    }
+}
+
+
+/* =====================================================
+   PŘÍBĚHOVÉ ZPRÁVY
+===================================================== */
+
+function storyMessage(title, text) {
+
+    showPuzzle(`
+
+        <div class="story-scene">
+
+            <div class="puzzle-label">
+                SECTOR 07
+            </div>
+
+            <h2>${title}</h2>
+
+            <div class="story-text">
+                ${text}
+            </div>
+
+            <button
+                class="main-button"
+                onclick="closePuzzle()">
+
+                POKRAČOVAT
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* =====================================================
+   ROOM 1 — PROBUZENÍ
+===================================================== */
 
 function openTerminalPuzzle() {
 
+    /*
+       Pokud je první místnost dokončená,
+       terminál už znovu neotvíráme.
+    */
+
     if (puzzleDone("terminal")) {
 
-        showPuzzleMessage(
-            "TERMINÁL JE JIŽ ODEMČENÝ.",
-            "success"
+        storyMessage(
+            "DVEŘE JSOU ODEMČENÉ",
+            "Terminál už mlčí. Na displeji zůstává pouze jedno slovo:<br><br><strong>ESCAPE.</strong>"
         );
 
         return;
     }
 
-    showPuzzle(`
 
-        <div class="puzzle terminal-puzzle">
+    /*
+       Pokud hráč ještě nenašel průkaz,
+       nejdřív dostane příběhový tutorial.
+    */
 
-            <div class="puzzle-label">
-                SECTOR 01 // SYSTEM TERMINAL
+    if (
+        typeof isItemCollected === "function" &&
+        !isItemCollected("oldID")
+    ) {
+
+        showPuzzle(`
+
+            <div class="story-scene">
+
+                <div class="puzzle-label">
+                    02:17 AM // UNKNOWN LOCATION
+                </div>
+
+                <h2>😨 KDE TO JSEM?</h2>
+
+                <div class="story-text">
+
+                    <p>
+                        Otevřeš oči.
+                    </p>
+
+                    <p>
+                        Nad tebou pomalu bliká zářivka.
+                        Jednou.
+                        Podruhé.
+                        Potom zhasne.
+                    </p>
+
+                    <p>
+                        Chvíli je úplná tma.
+                    </p>
+
+                    <p>
+                        Když se světlo znovu rozsvítí,
+                        ležíš na studené podlaze neznámé místnosti.
+                    </p>
+
+                    <p>
+                        Nevíš, jak ses sem dostal.
+                    </p>
+
+                    <p class="important">
+                        A dveře před tebou jsou zamčené.
+                    </p>
+
+                </div>
+
+                <button
+                    class="main-button"
+                    onclick="startRoomInvestigation()">
+
+                    PROZKOUMAT MÍSTNOST
+
+                </button>
+
             </div>
 
-            <h2>💻 STARÝ TERMINÁL</h2>
+        `);
+
+        return;
+    }
+
+
+    /*
+       Pokud průkaz má, pokračujeme k terminálu.
+    */
+
+    openTerminalCode();
+}
+
+
+/* =====================================================
+   PRVNÍ PROZKOUMÁNÍ
+===================================================== */
+
+function startRoomInvestigation() {
+
+    if (typeof playSound === "function") {
+        playSound("click");
+    }
+
+    showPuzzle(`
+
+        <div class="story-scene">
+
+            <div class="puzzle-label">
+                SECTOR 01 // UNKNOWN ROOM
+            </div>
+
+            <h2>🔎 PROZKOUMÁVÁŠ MÍSTNOST</h2>
+
+            <div class="story-text">
+
+                <p>
+                    Místnost je malá.
+                </p>
+
+                <p>
+                    Na pravé straně je starý stůl.
+                    Na něm leží několik prázdných papírů.
+                </p>
+
+                <p>
+                    V rohu bliká starý terminál.
+                </p>
+
+                <p>
+                    A vedle dveří je něco,
+                    co vypadá jako starý zaměstnanecký průkaz.
+                </p>
+
+                <p class="important">
+                    Možná by se mohl hodit.
+                </p>
+
+            </div>
+
+            <button
+                class="main-button"
+                onclick="closePuzzle(); focusOldID()">
+
+                PROZKOUMAT PRŮKAZ
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* =====================================================
+   PROHLÉDNUTÍ PRŮKAZU
+===================================================== */
+
+function focusOldID() {
+
+    /*
+       Pokud item ještě nebyl sebrán,
+       necháme hráče použít normální tlačítko VZÍT
+       z rooms.js.
+    */
+
+    showPuzzle(`
+
+        <div class="story-scene">
+
+            <div class="puzzle-label">
+                FOUND ITEM
+            </div>
+
+            <h2>🪪 STARÝ PRŮKAZ</h2>
+
+            <div class="item-inspection">
+
+                <div class="big-item-icon">
+                    🪪
+                </div>
+
+                <p>
+                    Na průkazu je napsáno:
+                </p>
+
+                <div class="evidence">
+
+                    <strong>
+                        SECTOR 07
+                    </strong>
+
+                    <br>
+
+                    EMPLOYEE:
+                    <span>J. MILLER</span>
+
+                    <br>
+
+                    ID:
+                    <span>4729</span>
+
+                </div>
+
+                <p>
+                    Průkaz je starý nejméně několik let.
+                </p>
+
+                <p class="important">
+                    Na zadní straně je ještě něco napsáno.
+                </p>
+
+            </div>
+
+            <button
+                class="main-button"
+                onclick="inspectOldIDBack()">
+
+                OTOČIT PRŮKAZ
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* =====================================================
+   ZADNÍ STRANA PRŮKAZU
+===================================================== */
+
+function inspectOldIDBack() {
+
+    if (typeof setFlag === "function") {
+        setFlag("examined_oldID", true);
+    }
+
+    showPuzzle(`
+
+        <div class="story-scene">
+
+            <div class="puzzle-label">
+                EVIDENCE // OLD ID
+            </div>
+
+            <h2>🪪 ZADNÍ STRANA</h2>
+
+            <div class="evidence-note">
+
+                <p>
+                    Na zadní straně někdo rukou napsal:
+                </p>
+
+                <div class="handwriting">
+                    „NEVĚŘ TOMU, CO TI ŘEKNOU.“
+                </div>
+
+                <div class="handwriting">
+                    „KÓD: 4729“
+                </div>
+
+            </div>
+
+            <p>
+                Takže čísla z průkazu nejsou náhoda.
+            </p>
+
+            <button
+                class="main-button"
+                onclick="openTerminalCode()">
+
+                ZKUSIT KÓD NA TERMINÁLU
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* =====================================================
+   TERMINÁL — PŘÍBĚH
+===================================================== */
+
+function openTerminalCode() {
+
+    showPuzzle(`
+
+        <div class="story-scene terminal-scene">
+
+            <div class="puzzle-label">
+                OLD TERMINAL // OFFLINE MODE
+            </div>
+
+            <h2>💻 TERMINÁL</h2>
 
             <div class="terminal-screen">
 
-                <div class="terminal-line">
-                    > SYSTEM BOOT...
+                <div>
+                    SYSTEM STARTING...
                 </div>
 
-                <div class="terminal-line">
-                    > POWER: LIMITED
+                <div>
+                    MEMORY ERROR
                 </div>
 
-                <div class="terminal-line warning">
-                    > ACCESS REQUIRED
+                <div>
+                    FACILITY: SECTOR 07
                 </div>
 
-                <div class="terminal-line">
-                    > ENTER 4-DIGIT CODE
+                <div class="warning">
+                    LOCKDOWN ACTIVE
                 </div>
 
             </div>
+
+            <p>
+                Terminál požaduje čtyřmístný kód.
+            </p>
 
             <input
                 id="terminalCode"
@@ -107,10 +421,10 @@ function openTerminalPuzzle() {
             >
 
             <button
-                class="puzzle-action"
+                class="main-button"
                 onclick="checkTerminalCode()">
 
-                ODEMKNOUT
+                POTVRDIT
 
             </button>
 
@@ -122,6 +436,10 @@ function openTerminalPuzzle() {
 }
 
 
+/* =====================================================
+   KONTROLA TERMINÁLU
+===================================================== */
+
 function checkTerminalCode() {
 
     const input =
@@ -132,21 +450,24 @@ function checkTerminalCode() {
     const code =
         input.value.trim();
 
+
     if (code === "4729") {
+
+        if (typeof setFlag === "function") {
+            setFlag("examined_oldID", true);
+        }
 
         finishPuzzle("terminal");
 
         showPuzzleMessage(
-            "ACCESS GRANTED // NAPÁJENÍ OBNOVENO",
+            "KÓD PŘIJAT. TERMINÁL SE PROBOUZÍ...",
             "success"
         );
 
-        setTimeout(() => {
-            closePuzzle();
 
-            if (typeof renderRoom === "function") {
-                renderRoom(currentRoom);
-            }
+        setTimeout(() => {
+
+            showTerminalStory();
 
         }, 1000);
 
@@ -163,16 +484,161 @@ function checkTerminalCode() {
         input.value = "";
 
         showPuzzleMessage(
-            "ACCESS DENIED // NESPRÁVNÝ KÓD",
+            "KÓD JE NESPRÁVNÝ.",
             "error"
         );
     }
 }
 
 
-/* =========================================
-   2 — KABELY
-========================================= */
+/* =====================================================
+   TERMINÁL — CO SE STALO
+===================================================== */
+
+function showTerminalStory() {
+
+    showPuzzle(`
+
+        <div class="story-scene">
+
+            <div class="puzzle-label">
+                RECOVERED LOG // 2009
+            </div>
+
+            <h2>⚠ ZÁZNAM NALEZEN</h2>
+
+            <div class="terminal-screen story-terminal">
+
+                <p>
+                    [23:41] INCIDENT DETECTED
+                </p>
+
+                <p>
+                    [23:46] LOCKDOWN INITIATED
+                </p>
+
+                <p>
+                    [23:52] ALL PERSONNEL EVACUATED
+                </p>
+
+                <p>
+                    [00:13] SIGNAL LOST
+                </p>
+
+                <p class="warning">
+                    [00:14] SUBJECTS REMAIN INSIDE
+                </p>
+
+            </div>
+
+            <div class="story-text">
+
+                <p>
+                    Ztuhneš.
+                </p>
+
+                <p>
+                    Oficiálně bylo zařízení uzavřeno
+                    kvůli technické závadě.
+                </p>
+
+                <p class="important">
+                    Jenže tento záznam říká něco úplně jiného.
+                </p>
+
+            </div>
+
+            <button
+                class="main-button"
+                onclick="unlockFirstRoom()">
+
+                OTEVŘÍT DVEŘE
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* =====================================================
+   ODEMKNUTÍ PRVNÍ DALŠÍ MÍSTNOSTI
+===================================================== */
+
+function unlockFirstRoom() {
+
+    if (typeof setFlag === "function") {
+        setFlag("room1_story_complete", true);
+    }
+
+    if (
+        typeof unlockRoom === "function"
+    ) {
+        unlockRoom("room2");
+    }
+
+    if (typeof playSound === "function") {
+        playSound("success");
+    }
+
+    closePuzzle();
+
+    setTimeout(() => {
+
+        showPuzzle(`
+
+            <div class="story-scene">
+
+                <div class="puzzle-label">
+                    SECTOR 01 // EXIT
+                </div>
+
+                <h2>🚪 DVEŘE SE OTEVŘELY</h2>
+
+                <div class="story-text">
+
+                    <p>
+                        Ozve se hlasité cvaknutí.
+                    </p>
+
+                    <p>
+                        Zámek dveří se uvolní.
+                    </p>
+
+                    <p>
+                        Za nimi je temná chodba.
+                    </p>
+
+                    <p>
+                        Na konci chodby bliká červené světlo.
+                    </p>
+
+                    <p class="important">
+                        Nemáš ponětí, co tě čeká dál.
+                    </p>
+
+                </div>
+
+                <button
+                    class="main-button"
+                    onclick="closePuzzle(); refreshRoom()">
+
+                    VYJÍT NA CHODBU →
+
+                </button>
+
+            </div>
+
+        `);
+
+    }, 400);
+}
+
+
+/* =====================================================
+   ROOM 2 — KABELY
+===================================================== */
 
 let cableSequence = [];
 
@@ -188,77 +654,121 @@ function openCablePuzzle() {
 
     if (puzzleDone("cables")) {
 
-        showPuzzleMessage(
-            "ROZVADĚČ JE JIŽ OPRAVENÝ.",
-            "success"
+        storyMessage(
+            "ROZVADĚČ",
+            "Napájení už jsi opravil. Kontrolky stále svítí."
         );
 
         return;
     }
 
-    cableSequence = [];
 
     showPuzzle(`
 
-        <div class="puzzle cable-puzzle">
+        <div class="story-scene">
 
             <div class="puzzle-label">
-                SECTOR 02 // POWER DISTRIBUTION
+                SECTOR 02 // TECHNICAL ROOM
             </div>
 
             <h2>🔌 ROZVADĚČ</h2>
 
+            <div class="story-text">
+
+                <p>
+                    Vstoupíš do technické místnosti.
+                </p>
+
+                <p>
+                    Dveře za tebou se zavřou.
+                </p>
+
+                <p>
+                    Uprostřed místnosti stojí starý rozvaděč.
+                </p>
+
+                <p>
+                    Čtyři kabely jsou vytržené.
+                </p>
+
+                <p class="important">
+                    Bez proudu se dál nedostaneš.
+                </p>
+
+            </div>
+
+            <button
+                class="main-button"
+                onclick="openCablePanel()">
+
+                PROZKOUMAT ROZVADĚČ
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+function openCablePanel() {
+
+    cableSequence = [];
+
+    showPuzzle(`
+
+        <div class="story-scene">
+
+            <div class="puzzle-label">
+                POWER DISTRIBUTION
+            </div>
+
+            <h2>🔌 KABELY</h2>
+
             <p>
-                Napájení je přerušeno.
-                Čtyři kabely musíš zapojit ve správném pořadí.
+                Na krytu rozvaděče je malá poznámka:
             </p>
 
-            <div class="cable-warning">
-                ⚠ ŠPATNÉ POŘADÍ RESETUJE SYSTÉM
+            <div class="evidence-note">
+
+                „ČERVENÁ → MODRÁ → ŽLUTÁ → ZELENÁ“
+
             </div>
+
+            <p>
+                Pořadí musíš dodržet přesně.
+            </p>
 
             <div class="cables">
 
                 <button
                     class="cable cable-red"
                     onclick="connectCable('red')">
-
-                    <span>🔴</span>
-                    ČERVENÝ
-
+                    🔴 ČERVENÝ
                 </button>
 
                 <button
                     class="cable cable-blue"
                     onclick="connectCable('blue')">
-
-                    <span>🔵</span>
-                    MODRÝ
-
+                    🔵 MODRÝ
                 </button>
 
                 <button
                     class="cable cable-yellow"
                     onclick="connectCable('yellow')">
-
-                    <span>🟡</span>
-                    ŽLUTÝ
-
+                    🟡 ŽLUTÝ
                 </button>
 
                 <button
                     class="cable cable-green"
                     onclick="connectCable('green')">
-
-                    <span>🟢</span>
-                    ZELENÝ
-
+                    🟢 ZELENÝ
                 </button>
 
             </div>
 
-            <div class="cable-progress">
-                <span id="cableProgress">0 / 4</span>
+            <div id="cableProgress">
+                0 / 4
             </div>
 
             <div id="cableMessage"></div>
@@ -276,6 +786,7 @@ function connectCable(color) {
             cableSequence.length
         ];
 
+
     if (color === expected) {
 
         cableSequence.push(color);
@@ -288,13 +799,18 @@ function connectCable(color) {
             vibrate(40);
         }
 
+
         const progress =
             document.getElementById("cableProgress");
 
+
         if (progress) {
+
             progress.textContent =
                 cableSequence.length + " / 4";
+
         }
+
 
         if (
             cableSequence.length ===
@@ -304,19 +820,19 @@ function connectCable(color) {
             finishPuzzle("cables");
 
             showPuzzleMessage(
-                "✓ VŠECHNY KABELY ZAPOJENY // NAPÁJENÍ OBNOVENO",
+                "NAPÁJENÍ OBNOVENO.",
                 "success"
             );
+
 
             setTimeout(() => {
 
                 closePuzzle();
 
-                if (typeof renderRoom === "function") {
-                    renderRoom(currentRoom);
-                }
+                refreshRoom();
 
-            }, 1100);
+            }, 1000);
+
         }
 
     } else {
@@ -328,7 +844,7 @@ function connectCable(color) {
         }
 
         if (typeof vibrate === "function") {
-            vibrate(250);
+            vibrate(200);
         }
 
         const progress =
@@ -339,16 +855,16 @@ function connectCable(color) {
         }
 
         showPuzzleMessage(
-            "⚠ ŠPATNÉ ZAPOJENÍ // SYSTÉM RESETOVÁN",
+            "ŠPATNÉ ZAPOJENÍ. ZAČÍNÁŠ ZNOVU.",
             "error"
         );
     }
 }
 
 
-/* =========================================
-   3 — BEZPEČNOSTNÍ PANEL
-========================================= */
+/* =====================================================
+   ROOM 3 — SECURITY
+===================================================== */
 
 let securitySequence = [];
 
@@ -364,56 +880,46 @@ function openSecurityPuzzle() {
 
     if (puzzleDone("security")) {
 
-        showPuzzleMessage(
-            "BEZPEČNOSTNÍ SYSTÉM JE DEAKTIVOVÁN.",
-            "success"
+        storyMessage(
+            "BEZPEČNOSTNÍ PANEL",
+            "Panel je deaktivovaný. Červené světlo už nesvítí."
         );
 
         return;
     }
 
+
     securitySequence = [];
+
 
     showPuzzle(`
 
-        <div class="puzzle security-puzzle">
+        <div class="story-scene">
 
             <div class="puzzle-label">
-                SECTOR 03 // SECURITY SYSTEM
+                SECTOR 03 // SECURITY
             </div>
 
             <h2>🚨 BEZPEČNOSTNÍ PANEL</h2>
 
             <p>
-                Sleduj blikající kontrolky.
-                Potom zopakuj jejich pořadí.
+                Kamera nad tebou se otočí přímo na tebe.
             </p>
 
-            <div class="security-display">
+            <p class="important">
+                „UNAUTHORIZED PERSON DETECTED.“
+            </p>
 
-                <span id="securityStatus">
-                    SLEDUJ SEKVENCI...
-                </span>
-
-            </div>
+            <p>
+                Panel začne blikat.
+            </p>
 
             <div class="security-buttons">
 
-                <button onclick="pressSecurity(1)">
-                    1
-                </button>
-
-                <button onclick="pressSecurity(2)">
-                    2
-                </button>
-
-                <button onclick="pressSecurity(3)">
-                    3
-                </button>
-
-                <button onclick="pressSecurity(4)">
-                    4
-                </button>
+                <button onclick="pressSecurity(1)">1</button>
+                <button onclick="pressSecurity(2)">2</button>
+                <button onclick="pressSecurity(3)">3</button>
+                <button onclick="pressSecurity(4)">4</button>
 
             </div>
 
@@ -423,23 +929,18 @@ function openSecurityPuzzle() {
 
     `);
 
-    setTimeout(() => {
-        playSecuritySequence();
-    }, 500);
+
+    setTimeout(
+        playSecuritySequence,
+        500
+    );
 }
 
 
 function playSecuritySequence() {
 
-    const status =
-        document.getElementById("securityStatus");
-
-    if (status) {
-        status.textContent =
-            "SLEDUJ SEKVENCI...";
-    }
-
     let index = 0;
+
 
     const interval =
         setInterval(() => {
@@ -451,13 +952,9 @@ function playSecuritySequence() {
 
                 clearInterval(interval);
 
-                if (status) {
-                    status.textContent =
-                        "ZOPAKUJ SEKVENCI";
-                }
-
                 return;
             }
+
 
             flashSecurityButton(
                 securityCorrect[index]
@@ -476,16 +973,21 @@ function flashSecurityButton(number) {
             ".security-buttons button"
         );
 
+
     const button =
         buttons[number - 1];
 
+
     if (!button) return;
 
+
     button.classList.add("flash");
+
 
     if (typeof playSound === "function") {
         playSound("click");
     }
+
 
     setTimeout(() => {
 
@@ -502,17 +1004,18 @@ function pressSecurity(number) {
             securitySequence.length
         ];
 
+
     if (number === expected) {
 
         securitySequence.push(number);
 
-        if (typeof playSound === "function") {
+
+        if (
+            typeof playSound === "function"
+        ) {
             playSound("click");
         }
 
-        if (typeof vibrate === "function") {
-            vibrate(40);
-        }
 
         if (
             securitySequence.length ===
@@ -522,19 +1025,18 @@ function pressSecurity(number) {
             finishPuzzle("security");
 
             showPuzzleMessage(
-                "✓ SECURITY SYSTEM DEACTIVATED",
+                "BEZPEČNOSTNÍ SYSTÉM DEAKTIVOVÁN.",
                 "success"
             );
+
 
             setTimeout(() => {
 
                 closePuzzle();
 
-                if (typeof renderRoom === "function") {
-                    renderRoom(currentRoom);
-                }
+                refreshRoom();
 
-            }, 1100);
+            }, 1000);
         }
 
     } else {
@@ -545,77 +1047,74 @@ function pressSecurity(number) {
             playSound("error");
         }
 
-        if (typeof vibrate === "function") {
-            vibrate(250);
-        }
-
         showPuzzleMessage(
-            "✕ CHYBA // SEKQUENCE RESETOVÁNA",
+            "CHYBA. SEKQUENCE RESETOVÁNA.",
             "error"
         );
 
-        setTimeout(() => {
-            playSecuritySequence();
-        }, 700);
+        setTimeout(
+            playSecuritySequence,
+            700
+        );
     }
 }
 
 
-/* =========================================
-   4 — LABORATOŘ
-========================================= */
+/* =====================================================
+   ROOM 4 — LABORATOŘ
+===================================================== */
 
 function openLabPuzzle() {
 
     if (puzzleDone("lab")) {
 
-        showPuzzleMessage(
-            "LABORATOŘ JE JIŽ ODEMČENÁ.",
-            "success"
+        storyMessage(
+            "LABORATOŘ",
+            "Laboratoř už jsi prohledal."
         );
 
         return;
     }
 
+
     showPuzzle(`
 
-        <div class="puzzle lab-puzzle">
+        <div class="story-scene">
 
             <div class="puzzle-label">
-                SECTOR 04 // RESEARCH LAB
+                SECTOR 04 // LAB
             </div>
 
             <h2>🧪 LABORATOŘ</h2>
 
             <p>
-                Čtyři lahvičky jsou označené pouze čísly.
-                Jedna obsahuje aktivátor.
+                Místnost je úplně tichá.
             </p>
 
-            <div class="vial-warning">
-                ⚠ VYBER OPATRNĚ
-            </div>
+            <p>
+                Na stole stojí čtyři lahvičky.
+            </p>
+
+            <p class="important">
+                Jedna z nich obsahuje aktivátor.
+            </p>
 
             <div class="vials">
 
                 <button onclick="chooseVial(1)">
-                    <span>🧪</span>
-                    <b>01</b>
+                    🧪 01
                 </button>
 
                 <button onclick="chooseVial(2)">
-                    <span>🧪</span>
-                    <b>02</b>
+                    🧪 02
                 </button>
 
                 <button onclick="chooseVial(3)">
-                    <span>🧪</span>
-                    <b>03</b>
+                    🧪 03
                 </button>
 
                 <button onclick="chooseVial(4)">
-                    <span>🧪</span>
-                    <b>04</b>
+                    🧪 04
                 </button>
 
             </div>
@@ -634,42 +1133,29 @@ function chooseVial(number) {
 
         finishPuzzle("lab");
 
-        showPuzzleMessage(
-            "✓ AKTIVÁTOR NALEZEN.",
-            "success"
-        );
-
-        /*
-         * Aktivátor je zároveň item v rooms.js.
-         * Přidáme ho do inventáře pouze pokud
-         * ho tam ještě hráč nemá.
-         */
-
         if (
-            typeof addItem === "function" &&
-            typeof hasItem === "function"
+            typeof addItem === "function"
         ) {
 
-            if (!hasItem("chemical")) {
-
-                addItem(
-                    "chemical",
-                    "Aktivátor",
-                    "Neznámá chemická látka.",
-                    "🧪"
-                );
-
-            }
+            addItem(
+                "chemical",
+                "Aktivátor",
+                "Neznámá chemická látka.",
+                "🧪"
+            );
 
         }
+
+        showPuzzleMessage(
+            "NAŠEL JSI AKTIVÁTOR.",
+            "success"
+        );
 
         setTimeout(() => {
 
             closePuzzle();
 
-            if (typeof renderRoom === "function") {
-                renderRoom(currentRoom);
-            }
+            refreshRoom();
 
         }, 1000);
 
@@ -679,81 +1165,65 @@ function chooseVial(number) {
             playSound("error");
         }
 
-        if (typeof vibrate === "function") {
-            vibrate(150);
-        }
-
         showPuzzleMessage(
-            "✕ ŠPATNÁ LAHVIČKA.",
+            "TATO LAHVIČKA JE PRÁZDNÁ.",
             "error"
         );
     }
 }
 
 
-/* =========================================
-   5 — ARCHIV
-========================================= */
+/* =====================================================
+   ROOM 5 — ARCHIV
+===================================================== */
 
 function openArchivePuzzle() {
 
     if (puzzleDone("archive")) {
 
-        showPuzzleMessage(
-            "ARCHIV BYL PROHLEDÁN.",
-            "success"
+        storyMessage(
+            "ARCHIV",
+            "Dokument INCIDENT 07 už máš."
         );
 
         return;
     }
 
+
     showPuzzle(`
 
-        <div class="puzzle archive-puzzle">
+        <div class="story-scene">
 
             <div class="puzzle-label">
-                SECTOR 05 // CLASSIFIED ARCHIVE
+                SECTOR 05 // ARCHIVE
             </div>
 
             <h2>📁 ARCHIV</h2>
 
             <p>
-                Některé dokumenty jsou poškozené.
-                Najdi záznam, který souvisí se SECTOR 07.
+                Regály jsou plné dokumentů.
+            </p>
+
+            <p>
+                Jeden název tě okamžitě zaujme.
             </p>
 
             <div class="documents">
 
-                <button
-                    onclick="chooseDocument(1)">
-
-                    <span>📄</span>
-                    INCIDENT 03
-
+                <button onclick="chooseDocument(1)">
+                    📄 INCIDENT 03
                 </button>
 
-                <button
-                    onclick="chooseDocument(2)">
-
-                    <span>📄</span>
-                    INCIDENT 07
-
+                <button onclick="chooseDocument(2)">
+                    📄 INCIDENT 07
                 </button>
 
-                <button
-                    onclick="chooseDocument(3)">
-
-                    <span>📄</span>
-                    INCIDENT 12
-
+                <button onclick="chooseDocument(3)">
+                    📄 INCIDENT 12
                 </button>
 
-                <button
-                    onclick="chooseDocument(4)">
-
-                    <span>📄</span>
-                    INCIDENT 19
-
+                <button onclick="chooseDocument(4)">
+                    📄 INCIDENT 19
                 </button>
 
             </div>
@@ -772,37 +1242,31 @@ function chooseDocument(number) {
 
         finishPuzzle("archive");
 
-        showPuzzleMessage(
-            "✓ INCIDENT 07 NALEZEN // SOUBOR ODEMČEN",
-            "success"
-        );
-
         if (
-            typeof addItem === "function" &&
-            typeof hasItem === "function"
+            typeof addItem === "function"
         ) {
 
-            if (!hasItem("incidentReport")) {
+            addItem(
+                "incidentReport",
+                "INCIDENT 07",
+                "Utajený dokument o události.",
+                "📄"
+            );
 
-                addItem(
-                    "incidentReport",
-                    "INCIDENT 07",
-                    "Utajený dokument o události v zařízení.",
-                    "📄"
-                );
-
-            }
         }
+
+        showPuzzleMessage(
+            "NAŠEL JSI INCIDENT 07.",
+            "success"
+        );
 
         setTimeout(() => {
 
             closePuzzle();
 
-            if (typeof renderRoom === "function") {
-                renderRoom(currentRoom);
-            }
+            refreshRoom();
 
-        }, 1100);
+        }, 1000);
 
     } else {
 
@@ -811,58 +1275,54 @@ function chooseDocument(number) {
         }
 
         showPuzzleMessage(
-            "Tento dokument se SECTOR 07 nesouvisí.",
+            "TENTO DOKUMENT NENÍ TEN, KTERÝ HLEDÁŠ.",
             "error"
         );
     }
 }
 
 
-/* =========================================
-   6 — CONTROL CENTER
-========================================= */
+/* =====================================================
+   ROOM 6 — CONTROL CENTER
+===================================================== */
 
 function openControlPuzzle() {
 
     if (puzzleDone("control")) {
 
-        showPuzzleMessage(
-            "CONTROL CENTER JE AKTIVNÍ.",
-            "success"
+        storyMessage(
+            "CONTROL CENTER",
+            "Hlavní systém je aktivní."
         );
 
         return;
     }
 
+
     showPuzzle(`
 
-        <div class="puzzle control-puzzle">
+        <div class="story-scene">
 
             <div class="puzzle-label">
-                SECTOR 06 // ROOT TERMINAL
+                SECTOR 06 // CONTROL
             </div>
 
             <h2>💻 CONTROL CENTER</h2>
 
             <div class="terminal-screen">
 
-                <div class="terminal-line">
-                    > ROOT ACCESS
-                </div>
-
-                <div class="terminal-line">
-                    > SECURITY LEVEL: MAXIMUM
-                </div>
-
-                <div class="terminal-line warning">
-                    > AUTHENTICATION REQUIRED
-                </div>
+                ROOT ACCESS REQUIRED<br><br>
+                INCIDENT DATABASE LOCKED
 
             </div>
 
             <p>
-                Systém požaduje šestimístný přístupový kód.
+                Dokument INCIDENT 07 obsahoval datum:
             </p>
+
+            <div class="evidence-note">
+                07 / 12 / 09
+            </div>
 
             <input
                 id="controlCode"
@@ -871,14 +1331,13 @@ function openControlPuzzle() {
                 inputmode="numeric"
                 maxlength="6"
                 placeholder="______"
-                autocomplete="off"
             >
 
             <button
-                class="puzzle-action"
+                class="main-button"
                 onclick="checkControlCode()">
 
-                ROOT ACCESS
+                ODEMKNOUT
 
             </button>
 
@@ -897,12 +1356,16 @@ function checkControlCode() {
 
     if (!input) return;
 
-    if (input.value.trim() === "071209") {
+
+    if (
+        input.value.trim() ===
+        "071209"
+    ) {
 
         finishPuzzle("control");
 
         showPuzzleMessage(
-            "✓ ROOT ACCESS GRANTED",
+            "ROOT ACCESS GRANTED.",
             "success"
         );
 
@@ -910,11 +1373,9 @@ function checkControlCode() {
 
             closePuzzle();
 
-            if (typeof renderRoom === "function") {
-                renderRoom(currentRoom);
-            }
+            refreshRoom();
 
-        }, 1100);
+        }, 1000);
 
     } else {
 
@@ -922,75 +1383,71 @@ function checkControlCode() {
             playSound("error");
         }
 
-        if (typeof vibrate === "function") {
-            vibrate(200);
-        }
-
         input.value = "";
 
         showPuzzleMessage(
-            "✕ PŘÍSTUP ZAMÍTNUT",
+            "NESPRÁVNÝ KÓD.",
             "error"
         );
     }
 }
 
 
-/* =========================================
-   7 — PODZEMNÍ TUNEL
-========================================= */
+/* =====================================================
+   ROOM 7 — TUNEL
+===================================================== */
 
 function openTunnelPuzzle() {
 
     if (puzzleDone("tunnel")) {
 
-        showPuzzleMessage(
-            "TUNEL JE JIŽ ODEMČENÝ.",
-            "success"
+        storyMessage(
+            "PODZEMNÍ TUNEL",
+            "Už víš, kudy vede cesta ven."
         );
 
         return;
     }
 
+
     showPuzzle(`
 
-        <div class="puzzle tunnel-puzzle">
+        <div class="story-scene">
 
             <div class="puzzle-label">
-                SECTOR 07 // UNDERGROUND ACCESS
+                SECTOR 07 // UNDERGROUND
             </div>
 
-            <h2>🚇 PODZEMNÍ TUNEL</h2>
+            <h2>🚇 TUNEL</h2>
 
             <p>
-                Před tebou jsou čtyři chodby.
-                Jen jedna vede k výstupu.
+                Tunel se rozdvojuje.
             </p>
 
-            <div class="tunnel-warning">
-                ⚠ SIGNÁL ZTRACEN
-            </div>
+            <p>
+                Pak znovu.
+            </p>
+
+            <p class="important">
+                Čtyři cesty. Jeden východ.
+            </p>
 
             <div class="tunnel-buttons">
 
                 <button onclick="chooseTunnel(1)">
-                    <span>←</span>
-                    A
+                    ← A
                 </button>
 
                 <button onclick="chooseTunnel(2)">
-                    <span>↑</span>
-                    B
+                    ↑ B
                 </button>
 
                 <button onclick="chooseTunnel(3)">
-                    <span>→</span>
-                    C
+                    → C
                 </button>
 
                 <button onclick="chooseTunnel(4)">
-                    <span>↓</span>
-                    D
+                    ↓ D
                 </button>
 
             </div>
@@ -1010,7 +1467,7 @@ function chooseTunnel(number) {
         finishPuzzle("tunnel");
 
         showPuzzleMessage(
-            "✓ SPRÁVNÁ CESTA // VÝCHOD NALEZEN",
+            "SPRÁVNÁ CESTA. VIDÍŠ SVĚTLO.",
             "success"
         );
 
@@ -1018,11 +1475,9 @@ function chooseTunnel(number) {
 
             closePuzzle();
 
-            if (typeof renderRoom === "function") {
-                renderRoom(currentRoom);
-            }
+            refreshRoom();
 
-        }, 1100);
+        }, 1000);
 
     } else {
 
@@ -1031,16 +1486,16 @@ function chooseTunnel(number) {
         }
 
         showPuzzleMessage(
-            "SLEPÁ CHODBA. ZKUS JINOU.",
+            "SLEPÁ CHODBA.",
             "error"
         );
     }
 }
 
 
-/* =========================================
-   8 — FINÁLNÍ ÚNIK
-========================================= */
+/* =====================================================
+   ROOM 8 — FINÁLE
+===================================================== */
 
 function openEscapePuzzle() {
 
@@ -1048,38 +1503,53 @@ function openEscapePuzzle() {
         return;
     }
 
+
     showPuzzle(`
 
-        <div class="puzzle escape-puzzle">
+        <div class="story-scene">
 
             <div class="puzzle-label">
-                EXIT // FINAL AUTHENTICATION
+                EXIT
             </div>
 
             <h2>🚪 HLAVNÍ VÝCHOD</h2>
 
-            <div class="escape-warning">
-                ⚠ POSLEDNÍ KONTROLA
+            <div class="story-text">
+
+                <p>
+                    Konečně jsi u hlavního východu.
+                </p>
+
+                <p>
+                    Položíš ruku na kliku.
+                </p>
+
+                <p>
+                    Nic.
+                </p>
+
+                <p>
+                    Na panelu svítí:
+                </p>
+
             </div>
 
-            <p>
-                Po všem, co jsi zjistil,
-                musíš určit pravdu o INCIDENTU 07.
-            </p>
+            <div class="terminal-screen">
+                INCIDENT 07 — CONFIRM TRUTH
+            </div>
 
             <div class="escape-options">
 
                 <button onclick="escapeAnswer(1)">
-                    Zařízení bylo uzavřeno
-                    kvůli technické závadě.
+                    TECHNICKÁ ZÁVADA
                 </button>
 
                 <button onclick="escapeAnswer(2)">
-                    INCIDENT 07 byl úmyslně utajen.
+                    INCIDENT BYL UTAJEN
                 </button>
 
                 <button onclick="escapeAnswer(3)">
-                    V zařízení se nic nestalo.
+                    NIC SE NESTALO
                 </button>
 
             </div>
@@ -1099,7 +1569,7 @@ function escapeAnswer(answer) {
         finishPuzzle("escape");
 
         showPuzzleMessage(
-            "✓ ACCESS GRANTED // DOORS UNLOCKING",
+            "ACCESS GRANTED.",
             "success"
         );
 
@@ -1109,7 +1579,7 @@ function escapeAnswer(answer) {
 
             showEnding();
 
-        }, 1300);
+        }, 1200);
 
     } else {
 
@@ -1118,21 +1588,22 @@ function escapeAnswer(answer) {
         }
 
         showPuzzleMessage(
-            "✕ ODPOVĚĎ ODMÍTNUTA",
+            "SYSTÉM ODPOVĚĎ ODMÍTL.",
             "error"
         );
     }
 }
 
 
-/* =========================================
-   PUZZLE MODAL
-========================================= */
+/* =====================================================
+   PUZZLE OKNO
+===================================================== */
 
 function showPuzzle(content) {
 
     let modal =
         document.getElementById("puzzleModal");
+
 
     if (!modal) {
 
@@ -1145,6 +1616,7 @@ function showPuzzle(content) {
         modal.className =
             "modal";
 
+
         modal.innerHTML = `
 
             <div class="modal-box puzzle-modal-box">
@@ -1152,7 +1624,7 @@ function showPuzzle(content) {
                 <div id="puzzleContent"></div>
 
                 <button
-                    class="secondary-button puzzle-close"
+                    class="secondary-button"
                     onclick="closePuzzle()">
 
                     ZAVŘÍT
@@ -1163,15 +1635,19 @@ function showPuzzle(content) {
 
         `;
 
+
         document.body.appendChild(modal);
     }
+
 
     const contentBox =
         document.getElementById("puzzleContent");
 
+
     if (contentBox) {
         contentBox.innerHTML = content;
     }
+
 
     modal.style.display = "flex";
 
@@ -1186,9 +1662,12 @@ function closePuzzle() {
     const modal =
         document.getElementById("puzzleModal");
 
+
     if (!modal) return;
 
+
     modal.classList.remove("show");
+
 
     setTimeout(() => {
 
@@ -1198,16 +1677,16 @@ function closePuzzle() {
 }
 
 
-/* =========================================
+/* =====================================================
    ZPRÁVY
-========================================= */
+===================================================== */
 
 function showPuzzleMessage(
     message,
     type = "normal"
 ) {
 
-    const targets = [
+    const ids = [
         "terminalMessage",
         "cableMessage",
         "securityMessage",
@@ -1218,9 +1697,11 @@ function showPuzzleMessage(
         "escapeMessage"
     ];
 
+
     let target = null;
 
-    for (const id of targets) {
+
+    for (const id of ids) {
 
         const element =
             document.getElementById(id);
@@ -1231,116 +1712,46 @@ function showPuzzleMessage(
         }
     }
 
+
     if (!target) return;
+
 
     target.className =
         "puzzle-message " + type;
+
 
     target.textContent =
         message;
 }
 
 
-/* =========================================
-   KONEC HRY
-========================================= */
-
-function showEnding() {
-
-    const gameScreen =
-        document.getElementById("gameScreen");
-
-    if (!gameScreen) return;
-
-    gameScreen.innerHTML = `
-
-        <div class="ending">
-
-            <div class="ending-icon">
-                🚪
-            </div>
-
-            <div class="puzzle-label">
-                INCIDENT 07 // FINAL REPORT
-            </div>
-
-            <h1>
-                ÚNIK
-            </h1>
-
-            <p>
-                Dveře se pomalu otevřely.
-            </p>
-
-            <p>
-                Studený vzduch zvenku tě praštil do obličeje.
-            </p>
-
-            <p>
-                Zařízení SECTOR 07 zůstává za tebou.
-            </p>
-
-            <p class="important">
-                Teď už víš, že oficiální verze byla lež.
-            </p>
-
-            <div class="ending-report">
-
-                INCIDENT 07<br>
-                FACILITY: SECTOR 07<br>
-                STATUS: CLASSIFIED<br>
-                SUBJECT: ESCAPED
-
-            </div>
-
-            <button
-                class="main-button"
-                onclick="location.reload()">
-
-                HRÁT ZNOVU
-
-            </button>
-
-        </div>
-
-    `;
-}
-
-
-/* =========================================
+/* =====================================================
    POUŽITÍ ITEMŮ
-========================================= */
+===================================================== */
 
 function useItemForPuzzle(itemId) {
 
     if (!itemId) return false;
+
 
     switch (itemId) {
 
         case "oldID":
 
             if (typeof setFlag === "function") {
-
-                setFlag(
-                    "examined_oldID",
-                    true
-                );
-
+                setFlag("examined_oldID", true);
             }
 
-            showPuzzleMessage(
-                "🪪 Na zadní straně průkazu jsou číslice: 4729.",
-                "normal"
-            );
+            inspectOldIDBack();
 
             return true;
 
 
         case "fuse":
 
-            showPuzzleMessage(
-                "🔋 Průmyslová pojistka. Vypadá, že patří do rozvaděče.",
-                "normal"
+            storyMessage(
+                "POJISTKA",
+                "Je to průmyslová pojistka. Vypadá, že patří do rozvaděče."
             );
 
             return true;
@@ -1348,9 +1759,9 @@ function useItemForPuzzle(itemId) {
 
         case "securityCard":
 
-            showPuzzleMessage(
-                "💳 Bezpečnostní karta. Umožňuje přístup k bezpečnostním systémům.",
-                "normal"
+            storyMessage(
+                "BEZPEČNOSTNÍ KARTA",
+                "Karta umožňuje přístup k bezpečnostním systémům."
             );
 
             return true;
@@ -1358,9 +1769,9 @@ function useItemForPuzzle(itemId) {
 
         case "chemical":
 
-            showPuzzleMessage(
-                "🧪 Aktivátor. Může být potřeba v některém ze systémů laboratoře.",
-                "normal"
+            storyMessage(
+                "AKTIVÁTOR",
+                "Neznámá chemická látka. Na lahvičce je stejné logo jako na dokumentech ze SECTOR 07."
             );
 
             return true;
@@ -1369,17 +1780,12 @@ function useItemForPuzzle(itemId) {
         case "incidentReport":
 
             if (typeof setFlag === "function") {
-
-                setFlag(
-                    "read_incident",
-                    true
-                );
-
+                setFlag("read_incident", true);
             }
 
-            showPuzzleMessage(
-                "📄 INCIDENT 07: Událost byla úmyslně utajena.",
-                "normal"
+            storyMessage(
+                "INCIDENT 07",
+                "Dokument potvrzuje, že oficiální vysvětlení události nebylo pravdivé."
             );
 
             return true;
@@ -1387,9 +1793,9 @@ function useItemForPuzzle(itemId) {
 
         case "accessToken":
 
-            showPuzzleMessage(
-                "🔑 Přístupový token pro hlavní systém.",
-                "normal"
+            storyMessage(
+                "PŘÍSTUPOVÝ TOKEN",
+                "Token je určený pro hlavní systém zařízení."
             );
 
             return true;
@@ -1402,15 +1808,18 @@ function useItemForPuzzle(itemId) {
 }
 
 
-/* =========================================
+/* =====================================================
    OTEVŘENÍ PUZZLU PODLE MÍSTNOSTI
-========================================= */
+===================================================== */
 
 function openCurrentRoomPuzzle() {
 
-    if (typeof currentRoom === "undefined") {
+    if (
+        typeof currentRoom === "undefined"
+    ) {
         return;
     }
+
 
     switch (currentRoom) {
 
@@ -1447,26 +1856,94 @@ function openCurrentRoomPuzzle() {
             break;
 
         default:
-            showPuzzleMessage(
-                "V této místnosti není žádná minihra."
+
+            storyMessage(
+                "NIC SE NEDĚJE",
+                "V této místnosti zatím není žádná aktivní událost."
             );
     }
 }
 
 
-/* =========================================
-   KOMPATIBILITA S ROOMS.JS
-========================================= */
+/* =====================================================
+   KONEC HRY
+===================================================== */
+
+function showEnding() {
+
+    const gameScreen =
+        document.getElementById("gameScreen");
+
+
+    if (!gameScreen) return;
+
+
+    gameScreen.innerHTML = `
+
+        <div class="ending">
+
+            <div class="ending-icon">
+                🚪
+            </div>
+
+            <div class="puzzle-label">
+                INCIDENT 07 // FINAL REPORT
+            </div>
+
+            <h1>
+                ÚNIK
+            </h1>
+
+            <p>
+                Dveře se otevřely.
+            </p>
+
+            <p>
+                Poprvé po dlouhé době vidíš venkovní světlo.
+            </p>
+
+            <p>
+                Otočíš se.
+            </p>
+
+            <p>
+                Budova za tebou je stále úplně tichá.
+            </p>
+
+            <p class="important">
+                Teď už víš, že „technická závada“ byla lež.
+            </p>
+
+            <div class="ending-report">
+
+                INCIDENT 07<br>
+                FACILITY: SECTOR 07<br>
+                STATUS: CLASSIFIED<br>
+                SUBJECT: ESCAPED
+
+            </div>
+
+            <button
+                class="main-button"
+                onclick="location.reload()">
+
+                HRÁT ZNOVU
+
+            </button>
+
+        </div>
+
+    `;
+}
+
+
+/* =====================================================
+   KOMPATIBILITA
+===================================================== */
 
 function updateRoomAfterPuzzle() {
 
-    if (
-        typeof renderRoom === "function" &&
-        typeof currentRoom !== "undefined"
-    ) {
-
-        renderRoom(currentRoom);
-    }
+    refreshRoom();
 
     if (typeof updateMap === "function") {
         updateMap();
