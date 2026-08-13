@@ -2,360 +2,185 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-<title>BLACKOUT: INCIDENT 07</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BLACKOUT 2.0</title>
 
 <style>
-
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-    margin:0;
-    padding:0;
-    min-height:100%;
-    background:#050609;
-    color:#d8d8d8;
-    font-family:monospace;
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 body{
-    overflow-x:hidden;
-}
-
-button{
+    margin:0;
+    background:#050608;
+    color:#ddd;
     font-family:monospace;
-    cursor:pointer;
 }
 
-#game{
-    min-height:100vh;
-    max-width:850px;
-    margin:auto;
-    position:relative;
-}
+button,select,input{font-family:monospace}
 
-/* =========================
-   TOP BAR
-========================= */
-
-#topbar{
-    height:55px;
-    border-bottom:1px solid #333;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 15px;
-    background:#090a0d;
+header{
     position:sticky;
     top:0;
     z-index:20;
+    height:58px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 14px;
+    background:#090b0f;
+    border-bottom:1px solid #292d34;
 }
 
 .logo{
-    color:#76ff84;
+    color:#72ff83;
+    letter-spacing:3px;
     font-weight:bold;
-    letter-spacing:2px;
 }
 
-.topRight{
+.headerBtns{
     display:flex;
-    gap:8px;
+    gap:7px;
 }
 
-.topButton{
-    background:#101217;
-    color:#aaa;
-    border:1px solid #333;
-    padding:8px 11px;
-    font-size:14px;
+button{
+    cursor:pointer;
 }
 
-.topButton:active{
-    background:#222;
+.smallBtn,
+.actionBtn{
+    background:#101319;
+    color:#ccc;
+    border:1px solid #343840;
+    padding:10px;
 }
 
-/* =========================
-   SCREENS
-========================= */
+.mainBtn{
+    display:block;
+    width:100%;
+    max-width:500px;
+    margin:14px auto;
+    padding:14px;
+    background:#0b120d;
+    border:1px solid #72ff83;
+    color:#72ff83;
+    font-weight:bold;
+}
+
+.mainBtn:active{
+    background:#72ff83;
+    color:#000;
+}
 
 .screen{
     display:none;
-    padding:20px 15px 40px;
+    max-width:900px;
+    margin:auto;
+    padding:22px 15px 60px;
 }
 
 .screen.active{
     display:block;
 }
 
-/* =========================
-   INTRO
-========================= */
-
-.introLogo{
-    text-align:center;
-    margin-top:60px;
+h1{
+    color:#72ff83;
 }
-
-.introLogo h1{
-    font-size:clamp(45px,13vw,100px);
-    margin:0;
-    letter-spacing:8px;
-    color:#76ff84;
-
-    text-shadow:
-        0 0 10px #25ff42,
-        0 0 30px #25ff42,
-        0 0 70px #25ff42;
-}
-
-.subtitle{
-    margin-top:8px;
-    color:#777;
-    letter-spacing:4px;
-}
-
-.storyBox{
-    margin:40px auto;
-    max-width:650px;
-    border:1px solid #303238;
-    background:#090a0d;
-    padding:22px;
-    line-height:1.7;
-    box-shadow:0 0 35px rgba(0,0,0,.5);
-}
-
-.storyBox .warning{
-    color:#ff4141;
-}
-
-.mainButton{
-    display:block;
-    margin:18px auto;
-    padding:15px 25px;
-    background:#0b120d;
-    color:#76ff84;
-    border:1px solid #76ff84;
-    font-size:16px;
-}
-
-.mainButton:active{
-    background:#76ff84;
-    color:#000;
-}
-
-/* =========================
-   ROOM
-========================= */
 
 .roomTitle{
-    color:#76ff84;
-    font-size:30px;
-    margin-bottom:5px;
+    color:#72ff83;
+    font-size:29px;
 }
 
 .roomNumber{
-    color:#666;
-    margin-bottom:20px;
+    color:#555;
+    margin-bottom:18px;
 }
 
-.roomDescription{
-    border-left:3px solid #76ff84;
-    padding-left:15px;
+.description{
     line-height:1.7;
-    color:#bbb;
+    border-left:3px solid #72ff83;
+    padding-left:14px;
 }
 
-.location{
-    margin-top:25px;
+.scene{
     min-height:180px;
-    border:1px solid #292b31;
-    background:
-        linear-gradient(
-            135deg,
-            #0a0b0f,
-            #050609
-        );
+    margin:22px 0;
+    padding:20px;
+    border:1px solid #292d34;
+    background:radial-gradient(circle,#12161c,#07080b 70%);
     display:flex;
     align-items:center;
     justify-content:center;
     text-align:center;
     color:#555;
-    letter-spacing:2px;
 }
 
 .actions{
-    margin-top:20px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:10px;
 }
 
-.actionButton{
-    padding:15px 8px;
-    background:#0b0d11;
-    color:#ccc;
-    border:1px solid #30333a;
-}
-
-.actionButton:active{
-    background:#1a1d23;
-}
-
-/* =========================
-   INVENTORY
-========================= */
-
-.inventory{
-    margin-top:20px;
-    padding:15px;
-    border:1px solid #25272d;
-    background:#08090c;
-}
-
-.inventoryTitle{
-    color:#76ff84;
-    margin-bottom:10px;
-}
-
-.inventoryItems{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-}
-
-.item{
-    border:1px solid #333;
-    padding:7px 10px;
-    color:#aaa;
-    background:#101116;
-}
-
-/* =========================
-   TEXT OUTPUT
-========================= */
-
 .output{
-    margin-top:20px;
-    padding:16px;
-    border:1px dashed #3b3d43;
-    background:#07080b;
-    line-height:1.7;
     display:none;
+    margin-top:18px;
+    padding:17px;
+    background:#080a0d;
+    border:1px dashed #3a3e46;
+    line-height:1.7;
 }
 
 .output.show{
     display:block;
 }
 
-.green{
-    color:#76ff84;
+.inventory{
+    margin-top:25px;
+    padding:15px;
+    border:1px solid #292d34;
+    background:#080a0d;
 }
 
-.red{
-    color:#ff4141;
+.inventoryTitle{
+    color:#72ff83;
+    margin-bottom:12px;
 }
 
-.yellow{
-    color:#ffe66b;
-}
-
-.dim{
-    color:#666;
-}
-
-/* =========================
-   TUTORIAL
-========================= */
-
-.tutorialCard{
-    max-width:600px;
-    margin:25px auto;
-    padding:20px;
-    background:#090a0d;
-    border:1px solid #333;
-}
-
-.tutorialCard h2{
-    color:#76ff84;
-}
-
-.tutorialStep{
-    margin:15px 0;
-    padding:12px;
-    border-left:2px solid #555;
-}
-
-/* =========================
-   SETTINGS
-========================= */
-
-.settingsRow{
+.items{
     display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 0;
-    border-bottom:1px solid #222;
-}
-
-.toggle{
-    min-width:70px;
-    padding:8px;
-    background:#101217;
-    color:#76ff84;
-    border:1px solid #76ff84;
-}
-
-/* =========================
-   MAP
-========================= */
-
-.map{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
+    flex-wrap:wrap;
     gap:8px;
-    max-width:600px;
-    margin:25px auto;
 }
 
-.mapRoom{
-    min-height:75px;
-    background:#0b0c10;
-    border:1px solid #30333a;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    color:#666;
-    font-size:12px;
+.item{
+    background:#111319;
+    border:1px solid #41454d;
+    padding:8px 10px;
 }
 
-.mapRoom.current{
-    border-color:#76ff84;
-    color:#76ff84;
+.story{
+    max-width:650px;
+    margin:30px auto;
+    padding:22px;
+    line-height:1.7;
+    background:#090b0f;
+    border:1px solid #30343b;
 }
 
-.mapRoom.locked{
-    color:#ff4141;
-}
-
-/* =========================
-   MODAL
-========================= */
+.green{color:#72ff83}
+.red{color:#ff4444}
+.yellow{color:#ffe66d}
+.blue{color:#62aaff}
+.gray{color:#666}
 
 .modal{
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.85);
     z-index:100;
+    background:rgba(0,0,0,.92);
     align-items:center;
     justify-content:center;
-    padding:20px;
+    padding:16px;
 }
 
 .modal.show{
@@ -364,377 +189,225 @@ button{
 
 .modalBox{
     width:100%;
-    max-width:500px;
-    background:#090a0d;
-    border:1px solid #444;
+    max-width:700px;
+    max-height:90vh;
+    overflow:auto;
     padding:20px;
-}
-
-.modalTitle{
-    color:#76ff84;
-    font-size:22px;
-    margin-bottom:20px;
-}
-
-/* =========================
-   GLITCH
-========================= */
-
-.glitch{
-    animation:glitch .12s infinite;
-}
-
-@keyframes glitch{
-
-0%{
-    transform:translate(0);
-}
-
-25%{
-    transform:translate(2px,-1px);
-}
-
-50%{
-    transform:translate(-2px,1px);
-}
-
-75%{
-    transform:translate(1px,2px);
-}
-
-100%{
-    transform:translate(0);
-}
-
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media(max-width:500px){
-
-.actions{
-    grid-template-columns:1fr;
+    background:#090b0f;
+    border:1px solid #444950;
 }
 
 .map{
-    grid-template-columns:repeat(2,1fr);
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin:20px 0;
 }
 
+.mapRoom{
+    min-height:85px;
+    padding:10px;
+    text-align:center;
+    background:#0d1015;
+    border:1px solid #383c44;
 }
 
+.mapRoom.locked{
+    opacity:.3;
+    border-color:#713535;
+}
+
+.mapRoom.current{
+    border:2px solid #72ff83;
+    box-shadow:0 0 15px #72ff8330;
+}
+
+.mapRoom.done{
+    border-color:#62aaff;
+}
+
+.inspect{
+    margin:10px 0;
+    padding:13px;
+    border:1px solid #33373e;
+    background:#0c0f14;
+}
+
+.inspect button{
+    margin-top:8px;
+}
+
+.cableRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin:10px 0;
+    padding:12px;
+    background:#101319;
+    border:1px solid #30343b;
+}
+
+select{
+    padding:9px;
+    background:#050608;
+    color:#ddd;
+    border:1px solid #555;
+}
+
+.hint{
+    margin:10px 0;
+    padding:12px;
+    border-left:3px solid #ffe66d;
+    background:#121108;
+}
+
+@media(max-width:550px){
+    .actions{grid-template-columns:1fr}
+    .map{grid-template-columns:repeat(2,1fr)}
+    .cableRow{flex-direction:column;align-items:stretch}
+    select{width:100%}
+}
 </style>
 </head>
 
-
 <body>
 
-
-<div id="game">
-
-
-<!-- =========================
-     TOP BAR
-========================= -->
-
-<div id="topbar">
-
-<div class="logo">
-BLACKOUT
-</div>
-
-<div class="topRight">
-
-<button
-class="topButton"
-onclick="openMap()">
-MAP
-</button>
-
-<button
-class="topButton"
-onclick="openSettings()">
-⚙
-</button>
-
-</div>
-
-</div>
+<header>
+    <div class="logo">BLACKOUT</div>
+    <div class="headerBtns">
+        <button class="smallBtn" onclick="openMap()">🗺️</button>
+        <button class="smallBtn" onclick="openInventory()">🎒</button>
+        <button class="smallBtn" onclick="openSettings()">⚙️</button>
+    </div>
+</header>
 
 
-<!-- =========================
-     INTRO
-========================= -->
+<!-- INTRO -->
 
-<section
-id="intro"
-class="screen active">
+<section id="intro" class="screen active">
 
-<div class="introLogo">
+    <div style="text-align:center;padding-top:55px">
 
-<h1>BLACKOUT</h1>
+        <div style="
+        font-size:clamp(45px,13vw,100px);
+        color:#72ff83;
+        letter-spacing:7px;
+        text-shadow:0 0 30px #35ff52">
+        BLACKOUT
+        </div>
 
-<div class="subtitle">
-INCIDENT 07
-</div>
+        <div class="gray">
+            INCIDENT 07
+        </div>
 
-</div>
+    </div>
 
+    <div class="story">
 
-<div class="storyBox">
+        <span class="red">⚠ INCIDENT REPORT</span>
 
-<div class="warning">
-⚠ SYSTEM NOTICE
-</div>
+        <br><br>
 
-<br>
+        Výzkumné zařízení SECTOR 07 bylo
+        oficiálně uzavřeno v roce 2009.
 
-Rok 2009.
+        <br><br>
 
-<br><br>
+        Důvod:
 
-Výzkumné zařízení
-označené jako <b>SECTOR 07</b>
-náhle přestalo komunikovat
-s okolním světem.
+        <span class="red">„technická závada“.</span>
 
-<br><br>
+        <br><br>
 
-Oficiální zpráva tvrdí,
-že šlo o obyčejný výpadek proudu.
+        Jenže dnes v noci se zařízení
+        znovu připojilo k síti.
 
-<br><br>
+        <br><br>
 
-Projekt byl uzavřen.
+        A ty ses v něm probudil.
 
-<br><br>
+        <br><br>
 
-<strong>
-O 17 let později se systém
-zařízení znovu aktivoval.
-</strong>
+        Dveře jsou zamčené.
 
-<br><br>
+        <br>
 
-A ty ses právě probudil uvnitř.
+        Elektřina nefunguje.
 
-<br><br>
+        <br><br>
 
-<div class="red">
-Něco je špatně.
-</div>
+        <span class="yellow">
+        Najdi cestu ven.
+        Zjisti, co se tady stalo.
+        A hlavně zjisti, proč se systém
+        znovu aktivoval.
+        </span>
 
-</div>
+    </div>
 
-
-<button
-class="mainButton"
-onclick="startTutorial()">
-
-▶ ZAČÍT
-
-</button>
+    <button class="mainBtn" onclick="startGame()">
+        ▶ ZAČÍT
+    </button>
 
 </section>
 
 
+<!-- ROOM 1 -->
 
-<!-- =========================
-     TUTORIAL
-========================= -->
+<section id="room1" class="screen">
 
-<section
-id="tutorial"
-class="screen">
+<div class="roomTitle">UBYTOVNA</div>
+<div class="roomNumber">SEKTOR 01</div>
 
-<div class="roomTitle">
-TUTORIAL
-</div>
+<div class="description">
 
-<div class="roomNumber">
-OVLÁDÁNÍ
-</div>
+Probudil ses na studené podlaze.
 
+<br><br>
 
-<div class="tutorialCard">
+V místnosti je několik věcí,
+které vypadají, že tu zůstaly
+od posledního dne provozu.
 
-<h2>
-Jak hrát
-</h2>
+<br><br>
 
-<div class="tutorialStep">
-
-🔎 <b>PROZKOUMAT</b>
-
-<br>
-
-Hledej stopy, předměty
-a informace.
+Dveře jsou bez proudu.
 
 </div>
 
-
-<div class="tutorialStep">
-
-🔧 <b>POUŽÍT</b>
-
-<br>
-
-Používej nalezené předměty
-na správných místech.
-
+<div class="scene">
+    [ UBYTOVACÍ MÍSTNOST ]
 </div>
-
-
-<div class="tutorialStep">
-
-🧠 <b>MINIHry</b>
-
-<br>
-
-Některé dveře vyžadují
-vyřešení hádanky.
-
-</div>
-
-
-<div class="tutorialStep">
-
-📖 <b>PŘÍBĚH</b>
-
-<br>
-
-Čti záznamy.
-Postupně zjistíš,
-co se v SECTORU 07 stalo.
-
-</div>
-
-
-<div class="tutorialStep">
-
-⚠ <b>POZOR</b>
-
-<br>
-
-Ne všechno, co najdeš,
-je pravda.
-
-</div>
-
-</div>
-
-
-<button
-class="mainButton"
-onclick="startRoom1()">
-
-POKRAČOVAT →
-
-</button>
-
-</section>
-
-
-
-<!-- =========================
-     ROOM 1
-========================= -->
-
-<section
-id="room1"
-class="screen">
-
-<div class="roomTitle">
-UBYTOVNA
-</div>
-
-<div class="roomNumber">
-MÍSTNOST 01
-</div>
-
-
-<div class="roomDescription">
-
-Probouzíš se na studené podlaze.
-
-Světla blikají.
-
-Na stole leží starý průkaz.
-
-Dveře jsou zamčené.
-
-</div>
-
-
-<div class="location">
-
-[ VÝZKUMNÁ UBYTOVNA ]
-
-</div>
-
 
 <div class="actions">
 
-<button
-class="actionButton"
-onclick="inspectBed()">
-
-🔎 PROZKOUMAT
-
+<button class="actionBtn" onclick="inspect('desk')">
+🔎 PROZKOUMAT STŮL
 </button>
 
-
-<button
-class="actionButton"
-onclick="inspectDoor()">
-
-🚪 DVEŘE
-
+<button class="actionBtn" onclick="inspect('bed')">
+🔎 PROZKOUMAT POSTEL
 </button>
 
-
-<button
-class="actionButton"
-onclick="inspectDesk()">
-
-🗄️ STŮL
-
+<button class="actionBtn" onclick="inspect('locker')">
+🔎 PROZKOUMAT SKŘÍŇKU
 </button>
 
-
-<button
-class="actionButton"
-onclick="openMap()">
-
-🗺️ MAPA
-
+<button class="actionBtn" onclick="inspect('door1')">
+🚪 PROZKOUMAT DVEŘE
 </button>
 
 </div>
 
-
-<div
-id="room1Output"
-class="output">
-</div>
-
+<div id="room1Output" class="output"></div>
 
 <div class="inventory">
 
-<div class="inventoryTitle">
-🎒 INVENTÁŘ
-</div>
+<div class="inventoryTitle">🎒 INVENTÁŘ</div>
 
-<div
-id="inventoryItems"
-class="inventoryItems">
-
-<div class="dim">
-Prázdný
-</div>
-
+<div id="inventoryItems" class="items">
+<span class="gray">Prázdný</span>
 </div>
 
 </div>
@@ -742,208 +415,1595 @@ Prázdný
 </section>
 
 
+<!-- ROOM 2 -->
+
+<section id="room2" class="screen">
+
+<div class="roomTitle">ÚDRŽBA</div>
+<div class="roomNumber">SEKTOR 02</div>
+
+<div class="description">
+
+Technická místnost.
+
+<br><br>
+
+Stěny jsou plné kabelů,
+starých servisních štítků
+a nouzových panelů.
+
+<br><br>
+
+Napájení je odpojeno.
+
 </div>
 
+<div class="scene">
+[ TECHNICKÁ ÚDRŽBA ]
+</div>
+
+<div class="actions">
+
+<button class="actionBtn" onclick="maintenance('panel')">
+🔎 PROZKOUMAT PANEL
+</button>
+
+<button class="actionBtn" onclick="maintenance('manual')">
+📄 PROZKOUMAT MANUÁL
+</button>
+
+<button class="actionBtn" onclick="maintenance('wall')">
+💡 PROZKOUMAT SVĚTLA
+</button>
+
+<button class="actionBtn" onclick="openCableGame()">
+🔌 OPRAVIT NAPÁJENÍ
+</button>
+
+</div>
+
+<div id="room2Output" class="output"></div>
+
+</section>
 
 
-<!-- =========================
-     SETTINGS MODAL
-========================= -->
+<!-- ROOM 3 -->
 
-<div
-id="settingsModal"
-class="modal">
+<section id="room3" class="screen">
+
+<div class="roomTitle">SECURITY</div>
+<div class="roomNumber">SEKTOR 03</div>
+
+<div class="description">
+
+Bezpečnostní checkpoint.
+
+<br><br>
+
+Na stole je terminál.
+
+<br><br>
+
+Za sklem vidíš další chodbu,
+ale dveře jsou zamčené.
+
+</div>
+
+<div class="scene">
+[ SECURITY CHECKPOINT ]
+</div>
+
+<div class="actions">
+
+<button class="actionBtn" onclick="security('terminal')">
+💻 PROZKOUMAT TERMINÁL
+</button>
+
+<button class="actionBtn" onclick="security('cabinet')">
+🗄️ PROZKOUMAT SKŘÍŇ
+</button>
+
+<button class="actionBtn" onclick="security('photo')">
+🖼️ PROZKOUMAT FOTOGRAFII
+</button>
+
+<button class="actionBtn" onclick="securityDoor()">
+🚪 PROZKOUMAT DVEŘE
+</button>
+
+</div>
+
+<div id="room3Output" class="output"></div>
+
+</section>
+
+
+<!-- ROOM 4 -->
+
+<section id="room4" class="screen">
+
+<div class="roomTitle">ARCHIV</div>
+<div class="roomNumber">SEKTOR 04</div>
+
+<div class="description">
+
+Archiv je plný papírových složek.
+
+<br><br>
+
+Na stole bliká starý počítač.
+
+<br><br>
+
+Některé dokumenty byly
+úmyslně odstraněny.
+
+</div>
+
+<div class="scene">
+[ ARCHIV SECTOR 07 ]
+</div>
+
+<div class="actions">
+
+<button class="actionBtn" onclick="archive('files')">
+📁 PROZKOUMAT SLOŽKY
+</button>
+
+<button class="actionBtn" onclick="archive('computer')">
+💻 ZAPNOUT POČÍTAČ
+</button>
+
+<button class="actionBtn" onclick="archive('drawer')">
+🗄️ PROZKOUMAT ZÁSUVKU
+</button>
+
+<button class="actionBtn" onclick="archive('poster')">
+📌 PROZKOUMAT NÁSTĚNKU
+</button>
+
+</div>
+
+<div id="room4Output" class="output"></div>
+
+</section>
+
+
+<!-- MAP -->
+
+<div id="mapModal" class="modal">
 
 <div class="modalBox">
 
-<div class="modalTitle">
-⚙ NASTAVENÍ
-</div>
-
-
-<div class="settingsRow">
-
-<span>
-🔊 Zvuky
-</span>
-
-<button
-id="soundToggle"
-class="toggle"
-onclick="toggleSetting('sound')">
-
-ON
-
-</button>
-
-</div>
-
-
-<div class="settingsRow">
-
-<span>
-🎵 Hudba
-</span>
-
-<button
-id="musicToggle"
-class="toggle"
-onclick="toggleSetting('music')">
-
-ON
-
-</button>
-
-</div>
-
-
-<div class="settingsRow">
-
-<span>
-📳 Vibrace
-</span>
-
-<button
-id="vibrationToggle"
-class="toggle"
-onclick="toggleSetting('vibration')">
-
-ON
-
-</button>
-
-</div>
-
-
-<div class="settingsRow">
-
-<span>
-✨ Efekty
-</span>
-
-<button
-id="effectsToggle"
-class="toggle"
-onclick="toggleSetting('effects')">
-
-ON
-
-</button>
-
-</div>
-
-
-<button
-class="mainButton"
-onclick="closeSettings()">
-
-ZPĚT
-
-</button>
-
-</div>
-
-</div>
-
-
-
-<!-- =========================
-     MAP MODAL
-========================= -->
-
-<div
-id="mapModal"
-class="modal">
-
-<div class="modalBox">
-
-<div class="modalTitle">
-🗺️ MAPA SECTORU 07
-</div>
-
+<h2 class="green">🗺️ MAPA SECTORU 07</h2>
 
 <div class="map">
 
-<div class="mapRoom current">
-01<br>UBYTOVNA
+<div id="m1" class="mapRoom current">
+🛏️<br>01<br>UBYTOVNA
+</div>
+
+<div id="m2" class="mapRoom locked">
+🔧<br>02<br>ÚDRŽBA
+</div>
+
+<div id="m3" class="mapRoom locked">
+🔐<br>03<br>SECURITY
+</div>
+
+<div id="m4" class="mapRoom locked">
+📁<br>04<br>ARCHIV
 </div>
 
 <div class="mapRoom locked">
-02<br>ÚDRŽBA
+🧪<br>05<br>LAB
 </div>
 
 <div class="mapRoom locked">
-03<br>SECURITY
+📡<br>06<br>KOMUNIKACE
 </div>
 
 <div class="mapRoom locked">
-04<br>ARCHIV
+💻<br>07<br>SERVER
 </div>
 
 <div class="mapRoom locked">
-05<br>LABORATOŘ
+🚇<br>08<br>TUNEL
 </div>
 
 <div class="mapRoom locked">
-06<br>KOMUNIKACE
-</div>
-
-<div class="mapRoom locked">
-07<br>SERVER
-</div>
-
-<div class="mapRoom locked">
-08<br>TUNEL
-</div>
-
-<div class="mapRoom locked">
-09<br>VÝCHOD
+🚪<br>09<br>VÝCHOD
 </div>
 
 </div>
 
-
-<div class="dim center">
-
-Některé části komplexu
-jsou stále uzamčené.
-
-</div>
-
-
-<button
-class="mainButton"
-onclick="closeMap()">
-
+<button class="mainBtn" onclick="closeMap()">
 ZPĚT
-
 </button>
 
 </div>
+</div>
+
+
+<!-- INVENTORY -->
+
+<div id="inventoryModal" class="modal">
+
+<div class="modalBox">
+
+<h2 class="green">🎒 INVENTÁŘ</h2>
+
+<div id="fullInventory"></div>
+
+<button class="mainBtn" onclick="closeInventory()">
+ZPĚT
+</button>
+
+</div>
+</div>
+
+
+<!-- SETTINGS -->
+
+<div id="settingsModal" class="modal">
+
+<div class="modalBox">
+
+<h2 class="green">⚙️ NASTAVENÍ</h2>
+
+<p>
+Zvuky:
+<button class="smallBtn" onclick="toggle('sound')" id="soundBtn">
+ON
+</button>
+</p>
+
+<p>
+Vibrace:
+<button class="smallBtn" onclick="toggle('vibration')" id="vibrationBtn">
+ON
+</button>
+</p>
+
+<p>
+Efekty:
+<button class="smallBtn" onclick="toggle('effects')" id="effectsBtn">
+ON
+</button>
+</p>
+
+<button class="mainBtn" onclick="testSound()">
+🔊 TEST ZVUKU
+</button>
+
+<button class="mainBtn" onclick="closeSettings()">
+ZPĚT
+</button>
+
+</div>
+</div>
+
+
+<!-- CABLE GAME -->
+
+<div id="cableModal" class="modal">
+
+<div class="modalBox">
+
+<h2 class="green">🔌 OBNOVENÍ NAPÁJENÍ</h2>
+
+<p>
+Terminály jsou označené A, B, C a D.
+Každý kabel má vlastní identifikaci.
+</p>
+
+<div class="hint">
+
+💡 <b>Neznáš zapojení.</b>
+
+<br><br>
+
+Musíš ho zjistit z informací,
+které jsi našel v místnosti.
 
 </div>
 
+<div class="cableRow">
+
+<span class="red">● ČERVENÝ</span>
+
+<select id="redCable">
+<option value="">---</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+</select>
+
+</div>
+
+<div class="cableRow">
+
+<span class="blue">● MODRÝ</span>
+
+<select id="blueCable">
+<option value="">---</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+</select>
+
+</div>
+
+<div class="cableRow">
+
+<span class="yellow">● ŽLUTÝ</span>
+
+<select id="yellowCable">
+<option value="">---</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+</select>
+
+</div>
+
+<div class="cableRow">
+
+<span class="green">● ZELENÝ</span>
+
+<select id="greenCable">
+<option value="">---</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+</select>
+
+</div>
+
+<button class="mainBtn" onclick="checkCables()">
+⚡ ZAPOJIT
+</button>
+
+<button class="mainBtn" onclick="closeCableGame()">
+ZPĚT
+</button>
+
+<div id="cableResult"></div>
+
+</div>
+</div>
 
 
 <script>
 
-/* =====================================
-   GAME DATA
-===================================== */
+/* =========================
+DATA
+========================= */
 
 let inventory=[];
 
+let flags={
+    pass:false,
+    screwdriver:false,
+    note:false,
+    uv:false,
+    power:false,
+    chip:false,
+    archiveKey:false,
+    room4:false
+};
+
 let settings={
     sound:true,
-    music:true,
     vibration:true,
     effects:true
 };
 
+let currentRoom="room1";
 
-/* =====================================
-   SETTINGS
-===================================== */
+
+/* =========================
+SAVE / LOAD
+========================= */
+
+function save(){
+
+localStorage.setItem(
+"blackout2_inventory",
+JSON.stringify(inventory)
+);
+
+localStorage.setItem(
+"blackout2_flags",
+JSON.stringify(flags)
+);
+
+localStorage.setItem(
+"blackout2_settings",
+JSON.stringify(settings)
+);
+
+}
+
+function load(){
+
+try{
+
+let a=localStorage.getItem(
+"blackout2_inventory"
+);
+
+let b=localStorage.getItem(
+"blackout2_flags"
+);
+
+let c=localStorage.getItem(
+"blackout2_settings"
+);
+
+if(a) inventory=JSON.parse(a);
+
+if(b)
+flags={
+...flags,
+...JSON.parse(b)
+};
+
+if(c)
+settings={
+...settings,
+...JSON.parse(c)
+};
+
+}catch(e){}
+
+renderInventory();
+updateMap();
+updateSettings();
+
+}
+
+
+/* =========================
+AUDIO
+========================= */
+
+let ctx;
+
+function audio(){
+
+if(!ctx)
+ctx=new(
+window.AudioContext ||
+window.webkitAudioContext
+)();
+
+if(ctx.state==="suspended")
+ctx.resume();
+
+}
+
+function beep(f=600,d=.08,v=.05){
+
+if(!settings.sound)return;
+
+audio();
+
+let o=ctx.createOscillator();
+let g=ctx.createGain();
+
+o.type="square";
+o.frequency.value=f;
+
+g.gain.value=v;
+
+o.connect(g);
+g.connect(ctx.destination);
+
+o.start();
+
+g.gain.exponentialRampToValueAtTime(
+.001,
+ctx.currentTime+d
+);
+
+o.stop(ctx.currentTime+d);
+
+}
+
+function vibrate(ms=30){
+
+if(
+settings.vibration &&
+navigator.vibrate
+)
+navigator.vibrate(ms);
+
+}
+
+function effect(){
+
+if(!settings.effects)return;
+
+document.body.style.filter="brightness(1.7)";
+
+setTimeout(()=>{
+document.body.style.filter="";
+},100);
+
+}
+
+
+/* =========================
+SCREENS
+========================= */
+
+function show(id){
+
+document
+.querySelectorAll(".screen")
+.forEach(x=>x.classList.remove("active"));
+
+document
+.getElementById(id)
+.classList.add("active");
+
+currentRoom=id;
+
+updateMap();
+
+window.scrollTo(0,0);
+
+}
+
+function startGame(){
+
+beep(700,.1,.06);
+
+show("room1");
+
+}
+
+
+/* =========================
+INVENTORY
+========================= */
+
+function addItem(item){
+
+if(inventory.includes(item))
+return;
+
+inventory.push(item);
+
+renderInventory();
+
+save();
+
+beep(850,.08,.06);
+vibrate(30);
+effect();
+
+}
+
+function has(item){
+
+return inventory.includes(item);
+
+}
+
+function renderInventory(){
+
+let box=
+document.getElementById(
+"inventoryItems"
+);
+
+if(!box)return;
+
+if(!inventory.length){
+
+box.innerHTML=
+'<span class="gray">Prázdný</span>';
+
+}else{
+
+box.innerHTML=
+inventory.map(
+x=>`<div class="item">🎒 ${x}</div>`
+).join("");
+
+}
+
+renderFullInventory();
+
+}
+
+function renderFullInventory(){
+
+let box=
+document.getElementById(
+"fullInventory"
+);
+
+if(!box)return;
+
+if(!inventory.length){
+
+box.innerHTML=
+'<p class="gray">Inventář je prázdný.</p>';
+
+return;
+
+}
+
+box.innerHTML=
+inventory.map(
+x=>`<div class="item" style="margin:5px">${x}</div>`
+).join("");
+
+}
+
+
+/* =========================
+ROOM 1
+========================= */
+
+function inspect(type){
+
+let out=
+document.getElementById(
+"room1Output"
+);
+
+out.classList.add("show");
+
+if(type==="desk"){
+
+if(flags.pass){
+
+out.innerHTML=`
+<span class="yellow">🗄️ STŮL</span>
+<br><br>
+Už tu nic dalšího není.
+`;
+
+return;
+}
+
+out.innerHTML=`
+
+<span class="yellow">🗄️ STŮL</span>
+
+<br><br>
+
+Na stole leží starý průkaz.
+
+<br>
+
+Vedle něj je malá kovová destička
+s označením:
+
+<br><br>
+
+<span class="green">
+A-17 / MAINTENANCE
+</span>
+
+<br><br>
+
+<button class="mainBtn"
+onclick="takePass()">
+✋ VZÍT STARÝ PRŮKAZ
+</button>
+
+`;
+
+}
+
+if(type==="bed"){
+
+out.innerHTML=`
+
+<span class="yellow">🛏️ POSTEL</span>
+
+<br><br>
+
+Pod matrací něco je.
+
+<br><br>
+
+Je to starý servisní šroubovák.
+
+<br><br>
+
+<button class="mainBtn"
+onclick="takeScrewdriver()">
+✋ VZÍT ŠROUBOVÁK
+</button>
+
+`;
+
+}
+
+if(type==="locker"){
+
+if(!has("STARÝ PRŮKAZ")){
+
+out.innerHTML=`
+
+<span class="red">
+🔒 SKŘÍŇKA JE ZAMČENÁ
+</span>
+
+<br><br>
+
+Na zámku je symbol zaměstnaneckého
+průkazu.
+
+`;
+
+return;
+}
+
+if(flags.screwdriver){
+
+out.innerHTML=`
+
+<span class="yellow">
+🗄️ SKŘÍŇKA
+</span>
+
+<br><br>
+
+Uvnitř už nic není.
+
+`;
+
+return;
+}
+
+out.innerHTML=`
+
+<span class="green">
+✓ PRŮKAZ PASUJE
+</span>
+
+<br><br>
+
+Skříňka se otevřela.
+
+<br><br>
+
+Uvnitř je stará UV svítilna.
+
+<br><br>
+
+<button class="mainBtn"
+onclick="takeUV()">
+✋ VZÍT UV SVÍTILNU
+</button>
+
+`;
+
+}
+
+if(type==="door1"){
+
+if(!flags.pass){
+
+out.innerHTML=`
+
+<span class="red">
+🚪 DVEŘE
+</span>
+
+<br><br>
+
+Elektronický zámek nefunguje.
+
+<br><br>
+
+Na panelu je štítek:
+
+<br><br>
+
+<span class="yellow">
+POWER REQUIRED
+</span>
+
+`;
+
+return;
+}
+
+out.innerHTML=`
+
+<span class="green">
+🚪 NOUZOVÝ ZÁMEK
+</span>
+
+<br><br>
+
+Vedle dveří je mechanická páka.
+
+<br><br>
+
+S ní můžeš dveře otevřít.
+
+<br><br>
+
+<button class="mainBtn"
+onclick="enterRoom2()">
+🔧 OTEVŘÍT DVEŘE
+</button>
+
+`;
+
+}
+
+}
+
+function takePass(){
+
+flags.pass=true;
+
+addItem("STARÝ PRŮKAZ");
+
+showOutput(
+"room1Output",
+`<span class="green">✓ STARÝ PRŮKAZ VZAT</span>`
+);
+
+}
+
+function takeScrewdriver(){
+
+flags.screwdriver=true;
+
+addItem("SERVISNÍ ŠROUBOVÁK");
+
+showOutput(
+"room1Output",
+`<span class="green">✓ ŠROUBOVÁK VZAT</span>`
+);
+
+}
+
+function takeUV(){
+
+flags.uv=true;
+
+addItem("UV SVÍTILNA");
+
+showOutput(
+"room1Output",
+`<span class="green">✓ UV SVÍTILNA VZATA</span>`
+);
+
+}
+
+function enterRoom2(){
+
+show("room2");
+
+beep(800,.1,.06);
+
+}
+
+
+/* =========================
+ROOM 2
+========================= */
+
+function maintenance(type){
+
+let out=
+document.getElementById(
+"room2Output"
+);
+
+out.classList.add("show");
+
+if(type==="panel"){
+
+if(!has("SERVISNÍ ŠROUBOVÁK")){
+
+out.innerHTML=`
+
+<span class="red">
+🔧 PANEL JE PEVNĚ UTAŽENÝ
+</span>
+
+<br><br>
+
+Potřebuješ vhodný nástroj.
+
+`;
+
+return;
+}
+
+out.innerHTML=`
+
+<span class="green">
+🔧 PANEL OTEVŘEN
+</span>
+
+<br><br>
+
+Uvnitř jsou čtyři terminály:
+
+<br><br>
+
+A — označení 4
+
+<br>
+B — označení 2
+
+<br>
+C — označení 1
+
+<br>
+D — označení 3
+
+<br><br>
+
+Ale pořád nevíš,
+který kabel kam patří.
+
+`;
+
+}
+
+if(type==="manual"){
+
+out.innerHTML=`
+
+<span class="yellow">
+📄 SERVISNÍ MANUÁL
+</span>
+
+<br><br>
+
+Stránka je roztržená.
+
+<br><br>
+
+Dochoval se pouze tento text:
+
+<br><br>
+
+„Modrý nikdy nesmí být připojen
+k terminálu s nejvyšším číslem.“
+
+<br><br>
+
+„Červený je vždy o jednu pozici
+před zeleným.“
+
+<br><br>
+
+Zbytek chybí.
+
+`;
+
+}
+
+if(type==="wall"){
+
+if(!has("UV SVÍTILNA")){
+
+out.innerHTML=`
+
+<span class="red">
+💡 NIC NEVIDÍŠ
+</span>
+
+<br><br>
+
+Na zdi jsou jen špinavé
+servisní značky.
+
+`;
+
+return;
+}
+
+out.innerHTML=`
+
+<span class="green">
+🔦 UV SVÍTILNA
+</span>
+
+<br><br>
+
+Pod UV světlem se objeví
+skrytá zpráva:
+
+<br><br>
+
+<span class="yellow">
+C → A → D → B
+</span>
+
+<br><br>
+
+Pod tím je další věta:
+
+<br>
+
+„Barvy jsou důležitější
+než pořadí.“
+
+<br><br>
+
+Tohle bude pravděpodobně
+souviset s kabely.
+
+`;
+
+}
+
+}
+
+
+/* =========================
+CABLE PUZZLE
+========================= */
+
+function openCableGame(){
+
+document
+.getElementById("cableModal")
+.classList.add("show");
+
+}
+
+function closeCableGame(){
+
+document
+.getElementById("cableModal")
+.classList.remove("show");
+
+}
+
+function checkCables(){
+
+let r=
+document.getElementById("redCable").value;
+
+let b=
+document.getElementById("blueCable").value;
+
+let y=
+document.getElementById("yellowCable").value;
+
+let g=
+document.getElementById("greenCable").value;
+
+let result=
+document.getElementById("cableResult");
+
+
+/*
+SKUTEČNÉ ŘEŠENÍ:
+RED = C
+BLUE = A
+YELLOW = D
+GREEN = B
+*/
+
+if(
+r==="C" &&
+b==="A" &&
+y==="D" &&
+g==="B"
+){
+
+flags.power=true;
+flags.chip=true;
+
+addItem("PŘÍSTUPOVÝ ČIP");
+
+save();
+
+result.innerHTML=`
+
+<br>
+
+<span class="green">
+⚡ NAPÁJENÍ OBNOVENO
+</span>
+
+<br><br>
+
+Celá místnost se rozsvítila.
+
+<br><br>
+
+Z panelu vyskočil přístupový čip.
+
+<br><br>
+
+<button class="mainBtn"
+onclick="goSecurity()">
+🔐 JÍT DO SECURITY
+</button>
+
+`;
+
+beep(500,.1,.06);
+
+setTimeout(
+()=>beep(900,.15,.08),
+150
+);
+
+effect();
+
+}else{
+
+result.innerHTML=`
+
+<br>
+
+<span class="red">
+❌ ŠPATNÉ ZAPOJENÍ
+</span>
+
+<br><br>
+
+⚡ Jiskra!
+
+<br><br>
+
+Systém kabelové ochrany
+odpojil napájení.
+
+<br><br>
+
+Zkus zkontrolovat stopy
+v místnosti.
+
+`;
+
+beep(130,.15,.08);
+
+vibrate(80);
+
+}
+
+}
+
+function goSecurity(){
+
+closeCableGame();
+
+show("room3");
+
+}
+
+
+/* =========================
+ROOM 3
+========================= */
+
+function security(type){
+
+let out=
+document.getElementById(
+"room3Output"
+);
+
+out.classList.add("show");
+
+if(type==="terminal"){
+
+if(!has("PŘÍSTUPOVÝ ČIP")){
+
+out.innerHTML=`
+
+<span class="red">
+ACCESS DENIED
+</span>
+
+<br><br>
+
+Terminál vyžaduje přístupový čip.
+
+`;
+
+return;
+}
+
+out.innerHTML=`
+
+<span class="green">
+ACCESS GRANTED
+</span>
+
+<br><br>
+
+Terminál zobrazil:
+
+<br><br>
+
+PROJECT 07
+
+<br>
+
+STATUS: ACTIVE
+
+<br><br>
+
+Poslední záznam:
+
+<br><br>
+
+<span class="yellow">
+„Pokud systém znovu nastartuje,
+nikdo nesmí otevřít SERVER.“
+</span>
+
+<br><br>
+
+Pod tím je přístupový protokol.
+
+<br><br>
+
+<span class="blue">
+ARCHIVE ACCESS ENABLED
+</span>
+
+<br><br>
+
+<button class="mainBtn"
+onclick="unlockArchive()">
+📁 OTEVŘÍT ARCHIV
+</button>
+
+`;
+
+}
+
+if(type==="cabinet"){
+
+out.innerHTML=`
+
+<span class="yellow">
+🗄️ SECURITY SKŘÍŇ
+</span>
+
+<br><br>
+
+Uvnitř jsou staré pásky.
+
+<br><br>
+
+Jedna má označení:
+
+<span class="red">
+INCIDENT 07
+</span>
+
+<br><br>
+
+Bez přehrávače ji zatím
+nemůžeš použít.
+
+`;
+
+}
+
+if(type==="photo"){
+
+out.innerHTML=`
+
+<span class="yellow">
+🖼️ FOTOGRAFIE
+</span>
+
+<br><br>
+
+Na fotografii je tým vědců.
+
+<br><br>
+
+Jedna osoba je přeškrtnutá.
+
+<br><br>
+
+Na zadní straně:
+
+<br><br>
+
+<span class="green">
+„Nikdy nevěř prvnímu záznamu.“
+</span>
+
+`;
+
+}
+
+}
+
+function securityDoor(){
+
+if(!flags.room4){
+
+document.getElementById(
+"room3Output"
+).innerHTML=`
+
+<span class="red">
+🚪 ZAMČENO
+</span>
+
+<br><br>
+
+Potřebuješ aktivovat
+ARCHIVE ACCESS.
+
+`;
+
+return;
+
+}
+
+show("room4");
+
+}
+
+function unlockArchive(){
+
+flags.room4=true;
+
+save();
+
+updateMap();
+
+show("room4");
+
+}
+
+
+/* =========================
+ROOM 4
+========================= */
+
+function archive(type){
+
+let out=
+document.getElementById(
+"room4Output"
+);
+
+out.classList.add("show");
+
+if(type==="files"){
+
+out.innerHTML=`
+
+<span class="yellow">
+📁 ARCHIVNÍ SLOŽKY
+</span>
+
+<br><br>
+
+Najdeš záznam z roku 2009.
+
+<br><br>
+
+„Incident nebyl nehoda.“
+
+<br><br>
+
+„Projekt byl přesunut
+do podzemního sektoru.“
+
+<br><br>
+
+Další stránka chybí.
+
+`;
+
+}
+
+if(type==="computer"){
+
+out.innerHTML=`
+
+<span class="green">
+💻 POČÍTAČ
+</span>
+
+<br><br>
+
+Přístup:
+
+<span class="red">
+LOCKED
+</span>
+
+<br><br>
+
+Na monitoru bliká:
+
+<br><br>
+
+<code>
+WHO TURNED IT BACK ON?
+</code>
+
+<br><br>
+
+Tohle bude důležité později.
+
+`;
+
+}
+
+if(type==="drawer"){
+
+if(!has("STARÝ PRŮKAZ")){
+
+out.innerHTML=`
+
+<span class="red">
+🔒 ZAMČENO
+</span>
+
+`;
+
+return;
+}
+
+out.innerHTML=`
+
+<span class="green">
+🗄️ ZÁSUVKA OTEVŘENA
+</span>
+
+<br><br>
+
+Uvnitř je starý dokument.
+
+<br><br>
+
+Na jeho okraji je napsáno:
+
+<br><br>
+
+<span class="yellow">
+„SEKTOR 05 — PODZEMÍ“
+</span>
+
+`;
+
+}
+
+if(type==="poster"){
+
+out.innerHTML=`
+
+<span class="yellow">
+📌 NÁSTĚNKA
+</span>
+
+<br><br>
+
+Na starém plánku zařízení
+je zakreslený tunel.
+
+<br><br>
+
+Pod ním:
+
+<br><br>
+
+<span class="red">
+„VÝCHOD NENÍ VÝCHOD.“
+</span>
+
+`;
+
+}
+
+}
+
+
+/* =========================
+MAP
+========================= */
+
+function openMap(){
+
+document
+.getElementById("mapModal")
+.classList.add("show");
+
+updateMap();
+
+}
+
+function closeMap(){
+
+document
+.getElementById("mapModal")
+.classList.remove("show");
+
+}
+
+function updateMap(){
+
+for(let i=1;i<=4;i++){
+
+let x=
+document.getElementById("m"+i);
+
+if(!x)continue;
+
+x.classList.remove("current");
+
+}
+
+let num=
+parseInt(
+currentRoom.replace("room","")
+);
+
+let current=
+document.getElementById("m"+num);
+
+if(current)
+current.classList.add("current");
+
+if(flags.pass)
+document.getElementById("m2")
+.classList.remove("locked");
+
+if(flags.power)
+document.getElementById("m3")
+.classList.remove("locked");
+
+if(flags.room4)
+document.getElementById("m4")
+.classList.remove("locked");
+
+}
+
+
+/* =========================
+INVENTORY MODAL
+========================= */
+
+function openInventory(){
+
+renderFullInventory();
+
+document
+.getElementById("inventoryModal")
+.classList.add("show");
+
+}
+
+function closeInventory(){
+
+document
+.getElementById("inventoryModal")
+.classList.remove("show");
+
+}
+
+
+/* =========================
+SETTINGS
+========================= */
 
 function openSettings(){
 
@@ -961,254 +2021,73 @@ document
 
 }
 
-
-function toggleSetting(type){
+function toggle(type){
 
 settings[type]=!settings[type];
 
-let id=type+"Toggle";
+save();
 
-let button=
-document.getElementById(id);
+updateSettings();
 
-button.innerText=
-settings[type]
-? "ON"
-: "OFF";
+if(settings.sound)
+beep(700,.07,.05);
 
-button.style.color=
-settings[type]
-? "#76ff84"
-: "#ff4141";
+vibrate(30);
 
 }
 
+function updateSettings(){
 
-/* =====================================
-   MAP
-===================================== */
+document.getElementById("soundBtn")
+.innerText=
+settings.sound?"ON":"OFF";
 
-function openMap(){
+document.getElementById("vibrationBtn")
+.innerText=
+settings.vibration?"ON":"OFF";
 
-document
-.getElementById("mapModal")
-.classList.add("show");
-
-}
-
-function closeMap(){
-
-document
-.getElementById("mapModal")
-.classList.remove("show");
+document.getElementById("effectsBtn")
+.innerText=
+settings.effects?"ON":"OFF";
 
 }
 
+function testSound(){
 
-/* =====================================
-   SCREEN SYSTEM
-===================================== */
+beep(500,.08,.05);
 
-function showScreen(id){
-
-document
-.querySelectorAll(".screen")
-.forEach(
-screen=>{
-screen.classList.remove("active");
-}
+setTimeout(
+()=>beep(850,.12,.06),
+150
 );
 
-document
-.getElementById(id)
-.classList.add("active");
+vibrate(50);
 
-window.scrollTo(0,0);
+effect();
 
 }
 
 
-/* =====================================
-   TUTORIAL
-===================================== */
+/* =========================
+HELPER
+========================= */
 
-function startTutorial(){
+function showOutput(id,text){
 
-showScreen("tutorial");
+let x=document.getElementById(id);
 
-}
+x.classList.add("show");
 
-
-function startRoom1(){
-
-showScreen("room1");
+x.innerHTML=text;
 
 }
 
 
-/* =====================================
-   ROOM 1
-===================================== */
-
-function inspectBed(){
-
-let output=
-document.getElementById("room1Output");
-
-output.classList.add("show");
-
-output.innerHTML=`
-
-<div class="yellow">
-🔎 PROZKOUMÁNO
-</div>
-
-<br>
-
-Pod postelí nic není.
-
-Ale na podlaze si všimneš
-škrábanců.
-
-Někdo se pokoušel
-dveře otevřít násilím.
-
-`;
-
-}
-
-
-function inspectDoor(){
-
-let output=
-document.getElementById("room1Output");
-
-output.classList.add("show");
-
-output.innerHTML=`
-
-<div class="red">
-🚪 DVEŘE UZAMČENY
-</div>
-
-<br>
-
-Elektronický zámek
-nemá napájení.
-
-Vedle něj je malý
-servisní konektor.
-
-<br><br>
-
-<span class="dim">
-Potřebuješ nejdřív
-obnovit napájení.
-</span>
-
-`;
-
-}
-
-
-function inspectDesk(){
-
-let output=
-document.getElementById("room1Output");
-
-output.classList.add("show");
-
-output.innerHTML=`
-
-<div class="yellow">
-🗄️ STŮL
-</div>
-
-<br>
-
-Na stole je starý průkaz.
-
-<br>
-
-<span class="green">
-SECTOR 07
-</span>
-
-<br><br>
-
-Jméno je téměř úplně
-vyškrábané.
-
-<br><br>
-
-Na zadní straně je
-jediná věta:
-
-<br><br>
-
-<span class="yellow">
-„Když světla zhasnou,
-NEOTVÍREJ DVEŘE.“
-</span>
-
-<br><br>
-
-To nedává moc smysl.
-
-`;
-
-addItem("STARÝ PRŮKAZ");
-
-}
-
-
-/* =====================================
-   INVENTORY
-===================================== */
-
-function addItem(item){
-
-if(inventory.includes(item)){
-return;
-}
-
-inventory.push(item);
-
-renderInventory();
-
-}
-
-
-function renderInventory(){
-
-let container=
-document.getElementById("inventoryItems");
-
-if(inventory.length===0){
-
-container.innerHTML=
-'<div class="dim">Prázdný</div>';
-
-return;
-
-}
-
-container.innerHTML="";
-
-inventory.forEach(item=>{
-
-let element=
-document.createElement("div");
-
-element.className="item";
-
-element.innerText=item;
-
-container.appendChild(element);
-
-});
-
-}
+/* =========================
+START
+========================= */
+
+load();
 
 </script>
 
