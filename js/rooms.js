@@ -2,19 +2,9 @@
    BLACKOUT — ATMOSPHERIC ROOMS SYSTEM
 ========================================= */
 
-/*
-   Místnosti jsou navržené jako průzkumné scény.
-   Důležité:
-   - průkaz NENÍ propojený s terminálem
-   - terminál nikdy nezobrazuje kód z průkazu
-   - sebrané předměty zmizí z místnosti
-   - postup se ukládá přes gameState
-*/
-
 const roomData = {
 
     room1: {
-
         name: "Probuzení",
         sector: "SECTOR 01",
 
@@ -28,7 +18,6 @@ const roomData = {
             "Nikde není slyšet žádný lidský hlas.",
 
         items: [
-
             {
                 id: "oldID",
                 name: "Starý průkaz",
@@ -36,7 +25,6 @@ const roomData = {
                 description:
                     "Starý zaměstnanecký průkaz. Je poškrábaný a očividně dlouho ležel na zemi."
             }
-
         ],
 
         actions: [
@@ -77,7 +65,6 @@ const roomData = {
 
 
     room2: {
-
         name: "Technická místnost",
         sector: "SECTOR 02",
 
@@ -90,7 +77,6 @@ const roomData = {
             "Někde pod podlahou běží generátor.",
 
         items: [
-
             {
                 id: "fuse",
                 name: "Průmyslová pojistka",
@@ -98,7 +84,6 @@ const roomData = {
                 description:
                     "Těžká pojistka vytažená z náhradního panelu."
             }
-
         ],
 
         actions: [
@@ -129,7 +114,6 @@ const roomData = {
 
 
     room3: {
-
         name: "Bezpečnostní chodba",
         sector: "SECTOR 03",
 
@@ -141,7 +125,6 @@ const roomData = {
             "Když uděláš několik kroků, jedna z kamer se pomalu otočí tvým směrem.",
 
         items: [
-
             {
                 id: "securityCard",
                 name: "Bezpečnostní karta",
@@ -149,7 +132,6 @@ const roomData = {
                 description:
                     "Karta nalezená pod rozbitým monitorem."
             }
-
         ],
 
         actions: [
@@ -180,20 +162,17 @@ const roomData = {
 
 
     room4: {
-
         name: "Laboratoř",
         sector: "SECTOR 04",
 
         description:
-            "Dveře laboratoře se otevřou jen napůl. " +
-            "Uvnitř je nepořádek.",
+            "Dveře laboratoře se otevřou jen napůl. Uvnitř je nepořádek.",
 
         atmosphere:
             "Na podlaze leží rozbité sklo. Některé přístroje jsou stále zapnuté, " +
             "přestože komplex měl být uzavřený už před lety.",
 
         items: [
-
             {
                 id: "chemical",
                 name: "Aktivátor",
@@ -201,7 +180,6 @@ const roomData = {
                 description:
                     "Neznámá chemická látka v malé označené lahvičce."
             }
-
         ],
 
         actions: [
@@ -232,19 +210,16 @@ const roomData = {
 
 
     room5: {
-
         name: "Archiv",
         sector: "SECTOR 05",
 
         description:
-            "Regály s dokumenty mizí ve tmě. " +
-            "Na mnoha složkách je tlustá vrstva prachu.",
+            "Regály s dokumenty mizí ve tmě. Na mnoha složkách je tlustá vrstva prachu.",
 
         atmosphere:
             "Některé zásuvky jsou otevřené. Někdo tu hledal konkrétní dokument.",
 
         items: [
-
             {
                 id: "incidentReport",
                 name: "INCIDENT 07",
@@ -252,7 +227,6 @@ const roomData = {
                 description:
                     "Utajený dokument označený červeným pruhem."
             }
-
         ],
 
         actions: [
@@ -283,7 +257,6 @@ const roomData = {
 
 
     room6: {
-
         name: "Kontrolní centrum",
         sector: "SECTOR 06",
 
@@ -294,7 +267,6 @@ const roomData = {
             "Jedna obrazovka se náhle rozsvítí. Potom druhá. A třetí.",
 
         items: [
-
             {
                 id: "accessToken",
                 name: "Přístupový token",
@@ -302,7 +274,6 @@ const roomData = {
                 description:
                     "Hardwarový token pro hlavní systém."
             }
-
         ],
 
         actions: [
@@ -333,17 +304,14 @@ const roomData = {
 
 
     room7: {
-
         name: "Podzemní tunel",
         sector: "SECTOR 07",
 
         description:
-            "Schody vedou hluboko pod komplex. " +
-            "Vzduch je tady chladnější.",
+            "Schody vedou hluboko pod komplex. Vzduch je tady chladnější.",
 
         atmosphere:
-            "Nouzová světla blikají v nepravidelném rytmu. " +
-            "Z jedné chodby se ozve kovová rána.",
+            "Nouzová světla blikají v nepravidelném rytmu. Z jedné chodby se ozve kovová rána.",
 
         items: [],
 
@@ -375,7 +343,6 @@ const roomData = {
 
 
     room8: {
-
         name: "Hlavní výstup",
         sector: "EXIT",
 
@@ -458,7 +425,7 @@ function isItemCollected(itemId) {
 
 
 /* =========================================
-   SEBRÁNÍ PŘEDMĚTU
+   VZÍT PŘEDMĚT
 ========================================= */
 
 function takeItem(itemId, roomId = currentRoom) {
@@ -475,9 +442,7 @@ function takeItem(itemId, roomId = currentRoom) {
     if (!item) return;
 
     if (isItemCollected(itemId)) {
-
         return;
-
     }
 
     collectedItems.push(itemId);
@@ -505,14 +470,41 @@ function takeItem(itemId, roomId = currentRoom) {
 
 
 /* =========================================
-   AKCE MÍSTNOSTI
+   SPUŠTĚNÍ AKCE
 ========================================= */
 
 function executeRoomAction(action) {
 
     if (!action) return;
 
+
+    /* -------------------------------------
+       PUZZLE
+    ------------------------------------- */
+
     if (action.puzzle) {
+
+        const puzzleId =
+            getPuzzleId(action.puzzle);
+
+
+        /*
+           Pokud je puzzle hotové,
+           vůbec ho znovu nespouštěj.
+        */
+
+        if (
+            puzzleId &&
+            typeof puzzleDone === "function" &&
+            puzzleDone(puzzleId)
+        ) {
+
+            playSound("error");
+
+            return;
+
+        }
+
 
         if (
             typeof window[action.puzzle] ===
@@ -524,8 +516,12 @@ function executeRoomAction(action) {
         }
 
         return;
-
     }
+
+
+    /* -------------------------------------
+       BĚŽNÁ AKCE
+    ------------------------------------- */
 
     if (action.message) {
 
@@ -541,12 +537,12 @@ function executeRoomAction(action) {
 
 
 /* =========================================
-   ZPRÁVA V MÍSTNOSTI
+   ZPRÁVA
 ========================================= */
 
 function showRoomMessage(message) {
 
-    let box =
+    const box =
         document.getElementById(
             "roomMessage"
         );
@@ -563,7 +559,7 @@ function showRoomMessage(message) {
 
 
 /* =========================================
-   VYKRESLENÍ
+   VYKRESLENÍ MÍSTNOSTI
 ========================================= */
 
 function renderRoom(roomId) {
@@ -576,13 +572,19 @@ function renderRoom(roomId) {
             "roomContent"
         );
 
-    if (!room || !container) return;
+    if (!room || !container) {
+        return;
+    }
 
     loadRoomItems();
 
+
+    /* -------------------------------------
+       KONTROLA ODEMČENÍ
+    ------------------------------------- */
+
     if (
-        typeof isRoomUnlocked ===
-        "function" &&
+        typeof isRoomUnlocked === "function" &&
         !isRoomUnlocked(roomId)
     ) {
 
@@ -590,9 +592,13 @@ function renderRoom(roomId) {
 
             <div class="room locked">
 
-                <div class="room-icon">🔒</div>
+                <div class="room-icon">
+                    🔒
+                </div>
 
-                <h1>MÍSTNOST UZAMČENA</h1>
+                <h1>
+                    MÍSTNOST UZAMČENA
+                </h1>
 
                 <p>
                     Přístup do této části komplexu
@@ -604,17 +610,31 @@ function renderRoom(roomId) {
         `;
 
         return;
-
     }
 
 
+    /* -------------------------------------
+       PŘEDMĚTY
+    ------------------------------------- */
+
     let itemsHTML = "";
+
 
     room.items.forEach(item => {
 
-        if (isItemCollected(item.id)) {
+        /*
+           Sebrané předměty se vůbec
+           nevykreslují.
+        */
+
+        if (
+            isItemCollected(item.id)
+        ) {
+
             return;
+
         }
+
 
         itemsHTML += `
 
@@ -655,9 +675,74 @@ function renderRoom(roomId) {
     });
 
 
+    /* -------------------------------------
+       AKCE
+    ------------------------------------- */
+
     let actionsHTML = "";
 
+
     room.actions.forEach(action => {
+
+        let solved = false;
+
+
+        if (action.puzzle) {
+
+            const puzzleId =
+                getPuzzleId(
+                    action.puzzle
+                );
+
+
+            solved =
+                puzzleId &&
+                typeof puzzleDone === "function" &&
+                puzzleDone(puzzleId);
+
+        }
+
+
+        /*
+           HOTOVÉ PUZZLE
+        */
+
+        if (solved) {
+
+            actionsHTML += `
+
+                <div
+                    class="room-action completed"
+                    aria-disabled="true"
+                >
+
+                    <span class="action-icon">
+                        ✅
+                    </span>
+
+                    <span>
+
+                        <strong>
+                            VYŘEŠENO
+                        </strong>
+
+                        <small>
+                            Tato část systému je již aktivní.
+                        </small>
+
+                    </span>
+
+                </div>
+
+            `;
+
+            return;
+        }
+
+
+        /*
+           NORMÁLNÍ AKCE
+        */
 
         actionsHTML += `
 
@@ -668,7 +753,8 @@ function renderRoom(roomId) {
                         roomData['${roomId}']
                             .actions
                             .find(
-                                a => a.id === '${action.id}'
+                                a =>
+                                a.id === '${action.id}'
                             )
                     )
                 "
@@ -697,9 +783,17 @@ function renderRoom(roomId) {
     });
 
 
+    /* -------------------------------------
+       ČÍSLO MÍSTNOSTI
+    ------------------------------------- */
+
     const number =
         getRoomNumber(roomId);
 
+
+    /* -------------------------------------
+       HTML MÍSTNOSTI
+    ------------------------------------- */
 
     container.innerHTML = `
 
@@ -750,7 +844,9 @@ function renderRoom(roomId) {
                             </h2>
 
                             <div class="room-items">
+
                                 ${itemsHTML}
+
                             </div>
 
                         </div>
@@ -804,20 +900,26 @@ function createNavigation(roomId) {
         roomData[roomId];
 
     const number =
-        getRoomNumber(roomId);
+        Number(
+            getRoomNumber(roomId)
+        );
 
     let html = "";
 
+
+    /* -------------------------------------
+       ZPĚT
+    ------------------------------------- */
 
     if (number > 1) {
 
         const previous =
             "room" +
-            (Number(number) - 1);
+            (number - 1);
+
 
         if (
-            typeof isRoomUnlocked ===
-            "function" &&
+            typeof isRoomUnlocked === "function" &&
             isRoomUnlocked(previous)
         ) {
 
@@ -841,10 +943,13 @@ function createNavigation(roomId) {
     }
 
 
+    /* -------------------------------------
+       DÁL
+    ------------------------------------- */
+
     if (
         room.nextRoom &&
-        typeof isRoomUnlocked ===
-        "function" &&
+        typeof isRoomUnlocked === "function" &&
         isRoomUnlocked(room.nextRoom)
     ) {
 
@@ -885,6 +990,46 @@ function getRoomNumber(roomId) {
     return match
         ? match[1].padStart(2, "0")
         : "00";
+
+}
+
+
+/* =========================================
+   ID PUZZLU
+========================================= */
+
+function getPuzzleId(puzzleFunction) {
+
+    const map = {
+
+        openTerminalPuzzle:
+            "terminal",
+
+        openCablePuzzle:
+            "cables",
+
+        openSecurityPuzzle:
+            "security",
+
+        openLabPuzzle:
+            "lab",
+
+        openArchivePuzzle:
+            "archive",
+
+        openControlPuzzle:
+            "control",
+
+        openTunnelPuzzle:
+            "tunnel",
+
+        openEscapePuzzle:
+            "escape"
+
+    };
+
+
+    return map[puzzleFunction] || "";
 
 }
 
