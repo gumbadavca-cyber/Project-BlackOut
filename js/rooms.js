@@ -1,5 +1,11 @@
 /* =========================================
-   BLACKOUT — ATMOSPHERIC ROOMS SYSTEM
+   BLACKOUT — ROOMS SYSTEM
+   ATMOSFÉRICKÁ VERZE
+========================================= */
+
+
+/* =========================================
+   DATA MÍSTNOSTÍ
 ========================================= */
 
 const roomData = {
@@ -10,8 +16,7 @@ const roomData = {
 
         description:
             "Pomalu otevíráš oči. Ležíš na studené podlaze. " +
-            "Nad tebou poblikává jediná zářivka. Každých několik sekund zhasne " +
-            "a místnost na okamžik pohltí úplná tma.",
+            "Nad tebou poblikává jediná zářivka. Dveře jsou zamčené.",
 
         atmosphere:
             "Ve vzduchu je cítit prach, kov a něco spáleného. " +
@@ -23,26 +28,25 @@ const roomData = {
                 name: "Starý průkaz",
                 icon: "🪪",
                 description:
-                    "Starý zaměstnanecký průkaz. Je poškrábaný a očividně dlouho ležel na zemi."
+                    "Starý zaměstnanecký průkaz. Je poškrábaný a dlouho ležel na zemi."
             }
         ],
 
         actions: [
-
             {
                 id: "door",
                 icon: "🚪",
                 name: "Zkusit dveře",
                 description:
-                    "Zámek cvakne, ale dveře se ani nepohnou.",
+                    "Elektronický zámek nereaguje.",
                 message:
-                    "Dveře jsou zamčené. Elektronický zámek nemá napájení."
+                    "Dveře jsou zamčené. Bez napájení je elektronický zámek mrtvý."
             },
 
             {
                 id: "terminal",
                 icon: "🖥️",
-                name: "Přistoupit k terminálu",
+                name: "Prozkoumat terminál",
                 description:
                     "Starý monitor v rohu místnosti právě problikl.",
                 puzzle: "openTerminalPuzzle"
@@ -53,11 +57,10 @@ const roomData = {
                 icon: "💡",
                 name: "Prohlédnout světlo",
                 description:
-                    "Zářivka se chystá znovu zhasnout.",
+                    "Zářivka každých několik sekund zabliká.",
                 message:
-                    "Na okamžik zahlédneš na stropě černé šmouhy. Vypadá to jako kouř."
+                    "Na stropě jsou černé šmouhy. Vypadá to jako staré stopy po kouři."
             }
-
         ],
 
         nextRoom: "room2"
@@ -69,11 +72,10 @@ const roomData = {
         sector: "SECTOR 02",
 
         description:
-            "Dveře se za tebou zavřou. Ocitáš se v malé technické místnosti. " +
-            "Podél stěn vedou desítky kabelů.",
+            "Malá technická místnost je plná kabelů, potrubí a starých rozvaděčů.",
 
         atmosphere:
-            "Z rozvaděče se ozve slabé elektrické praskání. " +
+            "Z jednoho rozvaděče se ozývá slabé elektrické praskání. " +
             "Někde pod podlahou běží generátor.",
 
         items: [
@@ -87,11 +89,10 @@ const roomData = {
         ],
 
         actions: [
-
             {
                 id: "breaker",
                 icon: "⚡",
-                name: "Prohlédnout rozvaděč",
+                name: "Prozkoumat rozvaděč",
                 description:
                     "Několik kabelů visí volně ze svorek.",
                 puzzle: "openCablePuzzle"
@@ -104,9 +105,8 @@ const roomData = {
                 description:
                     "Zvuk přichází zpod podlahy.",
                 message:
-                    "Generátor běží, ale napětí nedostává celý komplex. Něco je odpojené."
+                    "Generátor běží, ale elektřina se nedostává do celého komplexu."
             }
-
         ],
 
         nextRoom: "room3"
@@ -118,11 +118,10 @@ const roomData = {
         sector: "SECTOR 03",
 
         description:
-            "Úzká chodba pokračuje hluboko do komplexu. " +
-            "Na stropě jsou rozmístěné bezpečnostní kamery.",
+            "Dlouhá chodba mizí ve tmě. Na stropě jsou rozmístěné bezpečnostní kamery.",
 
         atmosphere:
-            "Když uděláš několik kroků, jedna z kamer se pomalu otočí tvým směrem.",
+            "Jedna z kamer se pomalu otočí tvým směrem. Červená kontrolka stále svítí.",
 
         items: [
             {
@@ -135,26 +134,24 @@ const roomData = {
         ],
 
         actions: [
-
             {
                 id: "camera",
                 icon: "📹",
                 name: "Prohlédnout kameru",
                 description:
-                    "Červená kontrolka kamery stále svítí.",
+                    "Kamera stále sleduje chodbu.",
                 message:
-                    "Kamera tě sleduje. Přenos někam odchází."
+                    "Kamera tě sleduje. Přenos někam stále odchází."
             },
 
             {
                 id: "panel",
                 icon: "🚨",
-                name: "Přistoupit k panelu",
+                name: "Prozkoumat bezpečnostní panel",
                 description:
                     "Na konci chodby bliká červené světlo.",
                 puzzle: "openSecurityPuzzle"
             }
-
         ],
 
         nextRoom: "room4"
@@ -166,11 +163,10 @@ const roomData = {
         sector: "SECTOR 04",
 
         description:
-            "Dveře laboratoře se otevřou jen napůl. Uvnitř je nepořádek.",
+            "Dveře laboratoře se otevřou jen napůl. Uvnitř je nepořádek a rozbité sklo.",
 
         atmosphere:
-            "Na podlaze leží rozbité sklo. Některé přístroje jsou stále zapnuté, " +
-            "přestože komplex měl být uzavřený už před lety.",
+            "Některé přístroje jsou stále zapnuté, přestože zařízení mělo být uzavřené už v roce 2009.",
 
         items: [
             {
@@ -183,11 +179,10 @@ const roomData = {
         ],
 
         actions: [
-
             {
                 id: "vials",
                 icon: "🧪",
-                name: "Prohlédnout lahvičky",
+                name: "Prozkoumat lahvičky",
                 description:
                     "Na stole jsou čtyři téměř identické lahvičky.",
                 puzzle: "openLabPuzzle"
@@ -198,11 +193,10 @@ const roomData = {
                 icon: "💻",
                 name: "Prohlédnout laboratorní počítač",
                 description:
-                    "Monitor zobrazuje pouze poškozený záznam.",
+                    "Na monitoru běží poškozený záznam.",
                 message:
                     "Záznam končí jedinou větou: „NEOTVÍRAT SEKTOR 07.“"
             }
-
         ],
 
         nextRoom: "room5"
@@ -214,10 +208,10 @@ const roomData = {
         sector: "SECTOR 05",
 
         description:
-            "Regály s dokumenty mizí ve tmě. Na mnoha složkách je tlustá vrstva prachu.",
+            "Regály plné dokumentů mizí ve tmě. Na složkách leží silná vrstva prachu.",
 
         atmosphere:
-            "Některé zásuvky jsou otevřené. Někdo tu hledal konkrétní dokument.",
+            "Některé zásuvky jsou otevřené. Někdo tady nedávno hledal konkrétní dokument.",
 
         items: [
             {
@@ -230,13 +224,12 @@ const roomData = {
         ],
 
         actions: [
-
             {
                 id: "files",
                 icon: "📁",
                 name: "Prohledat archiv",
                 description:
-                    "Některé dokumenty byly vytažené ze svých míst.",
+                    "Několik dokumentů bylo vytaženo ze svých míst.",
                 puzzle: "openArchivePuzzle"
             },
 
@@ -247,9 +240,8 @@ const roomData = {
                 description:
                     "Na stole zůstal starý přístupový protokol.",
                 message:
-                    "V protokolu jsou téměř všechny záznamy vymazané. Jeden záznam byl ručně začerněný."
+                    "Téměř všechny záznamy byly vymazány. Jeden byl ručně začerněný."
             }
-
         ],
 
         nextRoom: "room6"
@@ -277,7 +269,6 @@ const roomData = {
         ],
 
         actions: [
-
             {
                 id: "root",
                 icon: "💻",
@@ -296,7 +287,6 @@ const roomData = {
                 message:
                     "Záznam ukazuje chodbu, kterou jsi právě prošel. Čas záznamu je dnešní."
             }
-
         ],
 
         nextRoom: "room7"
@@ -316,7 +306,6 @@ const roomData = {
         items: [],
 
         actions: [
-
             {
                 id: "tunnel",
                 icon: "🚇",
@@ -335,7 +324,6 @@ const roomData = {
                 message:
                     "Kovová rána. Potom ticho. A pak slabý zvuk ventilace."
             }
-
         ],
 
         nextRoom: "room8"
@@ -355,7 +343,6 @@ const roomData = {
         items: [],
 
         actions: [
-
             {
                 id: "exit",
                 icon: "🚪",
@@ -364,7 +351,6 @@ const roomData = {
                     "Terminál čeká na poslední potvrzení.",
                 puzzle: "openEscapePuzzle"
             }
-
         ],
 
         nextRoom: null
@@ -374,7 +360,7 @@ const roomData = {
 
 
 /* =========================================
-   SEBRANÉ PŘEDMĚTY
+   INVENTÁŘ PŘEDMĚTŮ V MÍSTNOSTECH
 ========================================= */
 
 let collectedItems = [];
@@ -382,21 +368,28 @@ let collectedItems = [];
 
 function loadRoomItems() {
 
+    const saved =
+        localStorage.getItem(
+            "BLACKOUT_ROOM_ITEMS"
+        );
+
+    if (!saved) {
+
+        collectedItems = [];
+
+        return;
+
+    }
+
     try {
 
-        const saved =
-            localStorage.getItem(
-                "BLACKOUT_ROOM_ITEMS"
-            );
+        const data =
+            JSON.parse(saved);
 
         collectedItems =
-            saved
-                ? JSON.parse(saved)
+            Array.isArray(data)
+                ? data
                 : [];
-
-        if (!Array.isArray(collectedItems)) {
-            collectedItems = [];
-        }
 
     } catch {
 
@@ -411,7 +404,9 @@ function saveRoomItems() {
 
     localStorage.setItem(
         "BLACKOUT_ROOM_ITEMS",
-        JSON.stringify(collectedItems)
+        JSON.stringify(
+            collectedItems
+        )
     );
 
 }
@@ -419,18 +414,24 @@ function saveRoomItems() {
 
 function isItemCollected(itemId) {
 
-    return collectedItems.includes(itemId);
+    return collectedItems.includes(
+        itemId
+    );
 
 }
 
 
 /* =========================================
-   VZÍT PŘEDMĚT
+   SEBRAT PŘEDMĚT
 ========================================= */
 
-function takeItem(itemId, roomId = currentRoom) {
+function takeItem(
+    itemId,
+    roomId = currentRoom
+) {
 
-    const room = roomData[roomId];
+    const room =
+        roomData[roomId];
 
     if (!room) return;
 
@@ -442,14 +443,23 @@ function takeItem(itemId, roomId = currentRoom) {
     if (!item) return;
 
     if (isItemCollected(itemId)) {
+
         return;
+
     }
 
-    collectedItems.push(itemId);
+
+    collectedItems.push(
+        itemId
+    );
 
     saveRoomItems();
 
-    if (typeof addItem === "function") {
+
+    if (
+        typeof addItem ===
+        "function"
+    ) {
 
         addItem(
             item.id,
@@ -460,9 +470,11 @@ function takeItem(itemId, roomId = currentRoom) {
 
     }
 
+
     playSound("success");
     vibrate(70);
     flashScreen();
+
 
     renderRoom(roomId);
 
@@ -473,7 +485,21 @@ function takeItem(itemId, roomId = currentRoom) {
    SPUŠTĚNÍ AKCE
 ========================================= */
 
-function executeRoomAction(action) {
+function executeRoomAction(
+    roomId,
+    actionId
+) {
+
+    const room =
+        roomData[roomId];
+
+    if (!room) return;
+
+
+    const action =
+        room.actions.find(
+            a => a.id === actionId
+        );
 
     if (!action) return;
 
@@ -485,12 +511,14 @@ function executeRoomAction(action) {
     if (action.puzzle) {
 
         const puzzleId =
-            getPuzzleId(action.puzzle);
+            getPuzzleId(
+                action.puzzle
+            );
 
 
         /*
-           Pokud je puzzle hotové,
-           vůbec ho znovu nespouštěj.
+           PUZZLE JE HOTOVÉ
+           → nic znovu nespouštěj
         */
 
         if (
@@ -498,8 +526,6 @@ function executeRoomAction(action) {
             typeof puzzleDone === "function" &&
             puzzleDone(puzzleId)
         ) {
-
-            playSound("error");
 
             return;
 
@@ -516,6 +542,7 @@ function executeRoomAction(action) {
         }
 
         return;
+
     }
 
 
@@ -537,10 +564,12 @@ function executeRoomAction(action) {
 
 
 /* =========================================
-   ZPRÁVA
+   ZPRÁVA V MÍSTNOSTI
 ========================================= */
 
-function showRoomMessage(message) {
+function showRoomMessage(
+    message
+) {
 
     const box =
         document.getElementById(
@@ -549,11 +578,13 @@ function showRoomMessage(message) {
 
     if (!box) return;
 
-    box.className =
-        "room-message show";
 
     box.textContent =
         message;
+
+    box.classList.add(
+        "show"
+    );
 
 }
 
@@ -562,7 +593,9 @@ function showRoomMessage(message) {
    VYKRESLENÍ MÍSTNOSTI
 ========================================= */
 
-function renderRoom(roomId) {
+function renderRoom(
+    roomId
+) {
 
     const room =
         roomData[roomId];
@@ -576,11 +609,12 @@ function renderRoom(roomId) {
         return;
     }
 
+
     loadRoomItems();
 
 
     /* -------------------------------------
-       KONTROLA ODEMČENÍ
+       ODEMČENÍ
     ------------------------------------- */
 
     if (
@@ -610,6 +644,7 @@ function renderRoom(roomId) {
         `;
 
         return;
+
     }
 
 
@@ -620,59 +655,58 @@ function renderRoom(roomId) {
     let itemsHTML = "";
 
 
-    room.items.forEach(item => {
+    room.items.forEach(
+        item => {
 
-        /*
-           Sebrané předměty se vůbec
-           nevykreslují.
-        */
+            if (
+                isItemCollected(
+                    item.id
+                )
+            ) {
 
-        if (
-            isItemCollected(item.id)
-        ) {
+                return;
 
-            return;
+            }
+
+
+            itemsHTML += `
+
+                <div class="room-item">
+
+                    <div class="item-icon">
+                        ${item.icon}
+                    </div>
+
+                    <div class="item-info">
+
+                        <strong>
+                            ${item.name}
+                        </strong>
+
+                        <small>
+                            ${item.description}
+                        </small>
+
+                    </div>
+
+                    <button
+                        class="take-button"
+                        onclick="
+                            takeItem(
+                                '${item.id}',
+                                '${roomId}'
+                            )
+                        "
+                    >
+                        VZÍT
+                    </button>
+
+                </div>
+
+            `;
 
         }
-
-
-        itemsHTML += `
-
-            <div class="room-item">
-
-                <div class="item-icon">
-                    ${item.icon}
-                </div>
-
-                <div class="item-info">
-
-                    <strong>
-                        ${item.name}
-                    </strong>
-
-                    <small>
-                        ${item.description}
-                    </small>
-
-                </div>
-
-                <button
-                    class="take-button"
-                    onclick="
-                        takeItem(
-                            '${item.id}',
-                            '${roomId}'
-                        )
-                    "
-                >
-                    VZÍT
-                </button>
-
-            </div>
-
-        `;
-
-    });
+    );
 
 
     /* -------------------------------------
@@ -682,117 +716,115 @@ function renderRoom(roomId) {
     let actionsHTML = "";
 
 
-    room.actions.forEach(action => {
+    room.actions.forEach(
+        action => {
 
-        let solved = false;
-
-
-        if (action.puzzle) {
-
-            const puzzleId =
-                getPuzzleId(
-                    action.puzzle
-                );
+            let solved = false;
 
 
-            solved =
-                puzzleId &&
-                typeof puzzleDone === "function" &&
-                puzzleDone(puzzleId);
+            if (action.puzzle) {
 
-        }
+                const puzzleId =
+                    getPuzzleId(
+                        action.puzzle
+                    );
 
 
-        /*
-           HOTOVÉ PUZZLE
-        */
+                solved =
+                    puzzleId &&
+                    typeof puzzleDone === "function" &&
+                    puzzleDone(puzzleId);
 
-        if (solved) {
+            }
+
+
+            /* =============================
+               VYŘEŠENÉ PUZZLE
+            ============================= */
+
+            if (solved) {
+
+                actionsHTML += `
+
+                    <div
+                        class="room-action completed"
+                    >
+
+                        <span class="action-icon">
+                            ✅
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                ${action.name}
+                            </strong>
+
+                            <small>
+                                VYŘEŠENO — SYSTÉM ODEMČEN
+                            </small>
+
+                        </span>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            /* =============================
+               NORMÁLNÍ AKCE
+            ============================= */
 
             actionsHTML += `
 
-                <div
-                    class="room-action completed"
-                    aria-disabled="true"
+                <button
+                    class="room-action"
+                    onclick="
+                        executeRoomAction(
+                            '${roomId}',
+                            '${action.id}'
+                        )
+                    "
                 >
 
                     <span class="action-icon">
-                        ✅
+                        ${action.icon}
                     </span>
 
                     <span>
 
                         <strong>
-                            VYŘEŠENO
+                            ${action.name}
                         </strong>
 
                         <small>
-                            Tato část systému je již aktivní.
+                            ${action.description}
                         </small>
 
                     </span>
 
-                </div>
+                </button>
 
             `;
 
-            return;
         }
-
-
-        /*
-           NORMÁLNÍ AKCE
-        */
-
-        actionsHTML += `
-
-            <button
-                class="room-action"
-                onclick="
-                    executeRoomAction(
-                        roomData['${roomId}']
-                            .actions
-                            .find(
-                                a =>
-                                a.id === '${action.id}'
-                            )
-                    )
-                "
-            >
-
-                <span class="action-icon">
-                    ${action.icon}
-                </span>
-
-                <span>
-
-                    <strong>
-                        ${action.name}
-                    </strong>
-
-                    <small>
-                        ${action.description}
-                    </small>
-
-                </span>
-
-            </button>
-
-        `;
-
-    });
+    );
 
 
     /* -------------------------------------
-       ČÍSLO MÍSTNOSTI
+       ČÍSLO
     ------------------------------------- */
 
-    const number =
+    const roomNumber =
         getRoomNumber(roomId);
 
 
     /* -------------------------------------
-       HTML MÍSTNOSTI
+       HTML
     ------------------------------------- */
 
     container.innerHTML = `
@@ -814,7 +846,7 @@ function renderRoom(roomId) {
                 </div>
 
                 <div class="room-number">
-                    ${number}
+                    ${roomNumber}
                 </div>
 
             </div>
@@ -894,15 +926,24 @@ function renderRoom(roomId) {
    NAVIGACE
 ========================================= */
 
-function createNavigation(roomId) {
+function createNavigation(
+    roomId
+) {
 
     const room =
         roomData[roomId];
 
+    if (!room) {
+        return "";
+    }
+
+
     const number =
-        Number(
-            getRoomNumber(roomId)
+        parseInt(
+            getRoomNumber(roomId),
+            10
         );
+
 
     let html = "";
 
@@ -944,13 +985,15 @@ function createNavigation(roomId) {
 
 
     /* -------------------------------------
-       DÁL
+       DALŠÍ MÍSTNOST
     ------------------------------------- */
 
     if (
         room.nextRoom &&
         typeof isRoomUnlocked === "function" &&
-        isRoomUnlocked(room.nextRoom)
+        isRoomUnlocked(
+            room.nextRoom
+        )
     ) {
 
         html += `
@@ -977,18 +1020,103 @@ function createNavigation(roomId) {
 
 
 /* =========================================
+   ODEMKNUTÍ DALŠÍ MÍSTNOSTI
+========================================= */
+
+function unlockNextRoomFrom(
+    roomId
+) {
+
+    const room =
+        roomData[roomId];
+
+    if (!room) return;
+
+    if (!room.nextRoom) return;
+
+
+    if (
+        typeof unlockRoom ===
+        "function"
+    ) {
+
+        unlockRoom(
+            room.nextRoom
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   KONTROLA POSTUPU
+========================================= */
+
+function checkRoomProgress() {
+
+    const room =
+        roomData[currentRoom];
+
+    if (!room) return;
+
+
+    /*
+       Najdi puzzle místnosti.
+    */
+
+    const puzzleAction =
+        room.actions.find(
+            action =>
+                action.puzzle
+        );
+
+
+    if (!puzzleAction) {
+        return;
+    }
+
+
+    const puzzleId =
+        getPuzzleId(
+            puzzleAction.puzzle
+        );
+
+
+    if (
+        puzzleId &&
+        typeof puzzleDone === "function" &&
+        puzzleDone(puzzleId)
+    ) {
+
+        unlockNextRoomFrom(
+            currentRoom
+        );
+
+    }
+
+}
+
+
+/* =========================================
    ČÍSLO MÍSTNOSTI
 ========================================= */
 
-function getRoomNumber(roomId) {
+function getRoomNumber(
+    roomId
+) {
 
     const match =
         roomId.match(
             /room(\d+)/
         );
 
+
     return match
-        ? match[1].padStart(2, "0")
+        ? match[1].padStart(
+            2,
+            "0"
+        )
         : "00";
 
 }
@@ -998,7 +1126,9 @@ function getRoomNumber(roomId) {
    ID PUZZLU
 ========================================= */
 
-function getPuzzleId(puzzleFunction) {
+function getPuzzleId(
+    puzzleFunction
+) {
 
     const map = {
 
@@ -1029,7 +1159,66 @@ function getPuzzleId(puzzleFunction) {
     };
 
 
-    return map[puzzleFunction] || "";
+    return (
+        map[puzzleFunction] ||
+        ""
+    );
+
+}
+
+
+/* =========================================
+   OPRAVA PO DOKONČENÍ PUZZLU
+========================================= */
+
+function refreshRoomAfterPuzzle() {
+
+    /*
+       Zjisti, jestli je aktuální puzzle hotové.
+       Pokud ano, odemkni další místnost.
+    */
+
+    checkRoomProgress();
+
+
+    /*
+       Znovu vykresli místnost.
+       Tím se:
+       - puzzle označí jako hotové
+       - objeví se navigace DÁL
+       - staré tlačítko puzzle zmizí
+    */
+
+    if (
+        typeof renderRoom ===
+        "function"
+    ) {
+
+        renderRoom(
+            currentRoom
+        );
+
+    }
+
+
+    if (
+        typeof updateMap ===
+        "function"
+    ) {
+
+        updateMap();
+
+    }
+
+
+    if (
+        typeof updateUI ===
+        "function"
+    ) {
+
+        updateUI();
+
+    }
 
 }
 
